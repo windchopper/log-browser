@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.github.windchopper.tools.log.browser.actions.*?>
 <?import com.github.windchopper.tools.log.browser.configuration.*?>
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
+<?language javascript?>
+
+<!--suppress JavaFxUnresolvedFxIdReference-->
 
 <BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
@@ -15,10 +20,10 @@
             <padding>
                 <Insets top="2.0" bottom="4.0"/>
             </padding>
-            <MenuButton text="%com.github.windchopper.tools.log.browser.main.configurationButton">
+            <MenuButton text="%com.github.windchopper.tools.log.browser.main.configuration">
                 <items>
-                    <MenuItem text="%com.github.windchopper.tools.log.browser.main.importConfigurationButton" onAction="#importPressed"/>
-                    <MenuItem text="%com.github.windchopper.tools.log.browser.main.exportConfigurationButton" onAction="#exportPressed"/>
+                    <MenuItem fx:id="importConfigurationButton" text="%com.github.windchopper.tools.log.browser.main.importConfiguration"/>
+                    <MenuItem fx:id="exportConfigurationButton" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
                 </items>
             </MenuButton>
         </ToolBar>
@@ -32,10 +37,11 @@
             <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory">
                 <fx:reference source="configurationTreeRoot"/>
                 <contextMenu>
-                    <ContextMenu>
+                    <ContextMenu onShowing="prepareTreeActions()">
                         <items>
                             <MenuItem fx:id="newConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"/>
                             <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
+                            <SeparatorMenuItem/>
                             <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
                             <SeparatorMenuItem/>
                             <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group"/>
@@ -51,4 +57,38 @@
             </BorderPane>
         </SplitPane>
     </center>
+    <fx:define>
+        <ImportConfigurationAction fx:id="importConfigurationAction"/>
+        <ExportConfigurationAction fx:id="exportConfigurationAction"/>
+        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView"/>
+        <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView"/>
+        <RemoveAction fx:id="removeAction" view="$configurationTreeView"/>
+        <GroupAction fx:id="groupAction" view="$configurationTreeView"/>
+        <UngroupAction fx:id="ungroupAction" view="$configurationTreeView"/>
+        <PropertiesAction fx:id="propertiesAction" view="$configurationTreeView"/>
+    </fx:define>
+    <fx:script><![CDATA[
+        configurationTreeView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+
+        importConfigurationAction.bind(importConfigurationButton);
+        exportConfigurationAction.bind(exportConfigurationButton);
+
+        newConnectionAction.bind(newConnectionMenuItem);
+        newGroupAction.bind(newGroupMenuItem);
+        removeAction.bind(removeMenuItem);
+        groupAction.bind(groupMenuItem);
+        ungroupAction.bind(ungroupMenuItem);
+        propertiesAction.bind(propertiesMenuItem);
+
+        function prepareTreeActions() {
+            var selectedItems = configurationTreeView.getSelectionModel().getSelectedItems();
+
+            newConnectionAction.prepare(selectedItems);
+            newGroupAction.prepare(selectedItems);
+            removeAction.prepare(selectedItems);
+            groupAction.prepare(selectedItems);
+            ungroupAction.prepare(selectedItems);
+            propertiesAction.prepare(selectedItems);
+        }
+    ]]></fx:script>
 </BorderPane>

@@ -1,6 +1,7 @@
 module windchopper.tools.log.browser {
 
     opens com.github.windchopper.tools.log.browser;
+    opens com.github.windchopper.tools.log.browser.actions;
     opens com.github.windchopper.tools.log.browser.configuration;
 
     requires java.activation;

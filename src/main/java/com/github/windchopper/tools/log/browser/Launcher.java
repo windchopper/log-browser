@@ -3,6 +3,7 @@ package com.github.windchopper.tools.log.browser;
 import com.github.windchopper.common.fx.event.FXMLResourceOpen;
 import com.github.windchopper.common.fx.event.ResourceBundleLoading;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
