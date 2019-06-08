@@ -1,6 +1,6 @@
 package com.github.windchopper.tools.log.browser;
 
-interface FXMLResources {
+interface Forms {
 
     String FXML__MAIN = "com/github/windchopper/tools/log/browser/main.fxml";
 

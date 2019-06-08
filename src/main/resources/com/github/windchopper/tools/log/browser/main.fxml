@@ -1,13 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
+<?import com.github.windchopper.tools.log.browser.configuration.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="50.0" minWidth="100.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/12">
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
-        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
     </padding>
+    <top>
+        <ToolBar>
+            <padding>
+                <Insets top="2.0" bottom="4.0"/>
+            </padding>
+            <MenuButton text="%com.github.windchopper.tools.log.browser.main.configurationButton">
+                <items>
+                    <MenuItem text="%com.github.windchopper.tools.log.browser.main.importConfigurationButton" onAction="#importPressed"/>
+                    <MenuItem text="%com.github.windchopper.tools.log.browser.main.exportConfigurationButton" onAction="#exportPressed"/>
+                </items>
+            </MenuButton>
+        </ToolBar>
+    </top>
+    <fx:define>
+        <TreeItem fx:id="configurationTreeRoot"/>
+        <ConfigurationTreeCellFactory fx:id="configurationTreeCellFactory"/>
+    </fx:define>
     <center>
+        <SplitPane dividerPositions="0.3">
+            <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory">
+                <fx:reference source="configurationTreeRoot"/>
+                <contextMenu>
+                    <ContextMenu>
+                        <items>
+                            <MenuItem fx:id="newConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"/>
+                            <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
+                            <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group"/>
+                            <MenuItem fx:id="ungroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.ungroup"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem fx:id="propertiesMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.properties"/>
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </TreeView>
+            <BorderPane>
+
+            </BorderPane>
+        </SplitPane>
     </center>
 </BorderPane>
