@@ -5,18 +5,18 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-public class EncryptorSalt {
+public class Salt {
 
     private static final int SALT_SIZE = 8;
     private static final int ITERATION_COUNT = 1000;
 
     private final byte[] salt;
 
-    private EncryptorSalt(byte[] salt) {
+    private Salt(byte[] salt) {
         this.salt = salt;
     }
 
-    public EncryptorSalt() {
+    public Salt() {
         new SecureRandom().nextBytes(salt = new byte[SALT_SIZE]);
     }
 
@@ -28,14 +28,14 @@ public class EncryptorSalt {
         return Base64.getEncoder().encodeToString(salt);
     }
 
-    public static class XmlJavaTypeAdapter extends XmlAdapter<String, EncryptorSalt> {
+    public static class XmlJavaTypeAdapter extends XmlAdapter<String, Salt> {
 
-        @Override public String marshal(EncryptorSalt salt) {
+        @Override public String marshal(Salt salt) {
             return salt == null ? null : salt.base64EncodedString();
         }
 
-        @Override public EncryptorSalt unmarshal(String base64EncodedSalt) {
-            return base64EncodedSalt == null ? null : new EncryptorSalt(Base64.getDecoder().decode(base64EncodedSalt));
+        @Override public Salt unmarshal(String base64EncodedSalt) {
+            return base64EncodedSalt == null ? null : new Salt(Base64.getDecoder().decode(base64EncodedSalt));
         }
 
     }

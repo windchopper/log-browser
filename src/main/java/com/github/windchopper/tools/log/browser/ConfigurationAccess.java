@@ -1,7 +1,7 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.util.KnownSystemProperties;
-import com.github.windchopper.tools.log.browser.configuration.ConfigurationRoot;
+import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -26,15 +26,15 @@ import java.util.ResourceBundle;
     private Marshaller marshaller;
 
     private Path configurationFile;
-    private ConfigurationRoot configuration;
+    private Configuration configuration;
 
-    public ConfigurationRoot getConfiguration() {
+    public Configuration getConfiguration() {
         return configuration;
     }
 
     @PostConstruct private void afterConstruction() {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ConfigurationRoot.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
 
             marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -44,7 +44,7 @@ import java.util.ResourceBundle;
                 .resolve(".log-browser/configuration.xml");
 
             try (Reader reader = Files.newBufferedReader(configurationFile)) {
-                configuration = (ConfigurationRoot) jaxbContext
+                configuration = (Configuration) jaxbContext
                     .createUnmarshaller()
                     .unmarshal(reader);
             }

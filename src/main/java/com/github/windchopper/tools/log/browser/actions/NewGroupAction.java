@@ -1,15 +1,9 @@
 package com.github.windchopper.tools.log.browser.actions;
 
-import com.github.windchopper.common.util.Pipeliner;
-import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
-import com.github.windchopper.tools.log.browser.configuration.ConnectionNode;
-import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
-import com.github.windchopper.tools.log.browser.configuration.GroupNode;
+import com.github.windchopper.tools.log.browser.configuration.*;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 public class NewGroupAction extends ConfigurationTreeAction {
 
@@ -17,12 +11,8 @@ public class NewGroupAction extends ConfigurationTreeAction {
 
     public NewGroupAction() {
         textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"));
-        graphicProperty().set(Pipeliner.of(ImageView::new)
-            .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/box-new-16.png"))
-            .get());
-
         setHandler(event -> {
-            GroupNode groupNode = ((ContainerNode) parentItem.getValue()).addGroup();
+            GroupNode groupNode = ((GroupNode) parentItem.getValue()).addGroup();
             groupNode.setName("New group #" + System.currentTimeMillis());
 
             TreeItem<ConfigurationNode> connectionNodeItem = new TreeItem<>();

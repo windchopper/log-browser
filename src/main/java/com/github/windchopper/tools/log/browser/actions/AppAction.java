@@ -1,6 +1,7 @@
 package com.github.windchopper.tools.log.browser.actions;
 
 import com.github.windchopper.common.fx.Action;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 
 import java.util.ResourceBundle;
@@ -27,6 +28,14 @@ public class AppAction extends Action {
 
     public void setBindMenuItem(MenuItem menuItem) {
         bind(menuItem);
+    }
+
+    public Button getBindButton() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void setBindButton(Button button) {
+        bind(button);
     }
 
 }

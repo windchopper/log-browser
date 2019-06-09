@@ -5,13 +5,13 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <?language javascript?>
 
 <!--suppress JavaFxUnresolvedFxIdReference-->
 <!--suppress JSUnusedLocalSymbols-->
+
 <BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
@@ -22,16 +22,13 @@
                 <Insets top="2.0" bottom="4.0"/>
             </padding>
             <MenuButton text="%com.github.windchopper.tools.log.browser.main.configuration">
-                <graphic>
-                    <ImageView>
-                        <Image url="/com/github/windchopper/tools/log/browser/images/gear-16.png"/>
-                    </ImageView>
-                </graphic>
                 <items>
                     <MenuItem fx:id="importConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.importConfiguration"/>
                     <MenuItem fx:id="exportConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
                 </items>
             </MenuButton>
+            <Button fx:id="setPasswordButton"/>
+            <Button fx:id="gatherButton"/>
         </ToolBar>
     </top>
     <fx:define>
@@ -45,9 +42,11 @@
                 <contextMenu>
                     <ContextMenu onShowing="prepareTreeActions()">
                         <items>
-                            <MenuItem fx:id="newSecureShellConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newSecureShellConnection"/>
-                            <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
-                            <SeparatorMenuItem/>
+                            <Menu text="%com.github.windchopper.tools.log.browser.main.tree.menu.new">
+                                <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem fx:id="newConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"/>
+                            </Menu>
                             <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
                             <SeparatorMenuItem/>
                             <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group"/>
@@ -64,7 +63,9 @@
     <fx:define>
         <ImportConfigurationAction fx:id="importConfigurationAction" bindMenuItem="$importConfigurationMenuItem"/>
         <ExportConfigurationAction fx:id="exportConfigurationAction" bindMenuItem="$exportConfigurationMenuItem"/>
-        <NewSecureShellConnectionAction fx:id="newSecureShellConnectionAction" view="$configurationTreeView" bindMenuItem="$newSecureShellConnectionMenuItem"/>
+        <SetPasswordAction fx:id="setPasswordAction" bindButton="$setPasswordButton"/>
+        <GatherAction fx:id="gatherAction" bindButton="$gatherButton"/>
+        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView" bindMenuItem="$newConnectionMenuItem"/>
         <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView" bindMenuItem="$newGroupMenuItem"/>
         <RemoveAction fx:id="removeAction" view="$configurationTreeView" bindMenuItem="$removeMenuItem"/>
         <GroupAction fx:id="groupAction" view="$configurationTreeView" bindMenuItem="$groupMenuItem"/>
@@ -74,7 +75,7 @@
     <fx:script><![CDATA[
         configurationTreeView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
 
-        var treeActions = [newSecureShellConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
+        var treeActions = [newConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
 
         function prepareTreeActions() {
             treeActions.forEach(function(treeAction) {

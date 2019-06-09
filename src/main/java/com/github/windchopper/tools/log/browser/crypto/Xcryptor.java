@@ -8,14 +8,14 @@ import javax.crypto.spec.PBEParameterSpec;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 
-public class Encryptor {
+public class Xcryptor {
 
     private final Cipher cipher = Cipher.getInstance("PBEWithMD5AndTripleDES");
 
     private final PBEParameterSpec parameters;
     private final SecretKey key;
 
-    public Encryptor(char[] password, EncryptorSalt salt) throws GeneralSecurityException {
+    public Xcryptor(char[] password, Salt salt) throws GeneralSecurityException {
         parameters = salt.passwordBasedEncryptionParameters();
         key = SecretKeyFactory.getInstance(cipher.getAlgorithm()).generateSecret(
             new PBEKeySpec(password));

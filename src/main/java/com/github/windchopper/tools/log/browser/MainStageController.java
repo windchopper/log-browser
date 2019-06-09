@@ -4,7 +4,7 @@ import com.github.windchopper.common.fx.annotation.FXMLResource;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.actions.AppAction;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
-import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
+import com.github.windchopper.tools.log.browser.configuration.GroupNode;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -48,8 +48,8 @@ import java.util.logging.Level;
     private <T extends ConfigurationNode> void loadWithConfigurationNode(TreeItem<ConfigurationNode> item, T configurationNode) {
         item.setValue(configurationNode);
 
-        if (configurationNode instanceof ContainerNode) {
-            Optional.ofNullable(((ContainerNode) configurationNode).getGroups())
+        if (configurationNode instanceof GroupNode) {
+            Optional.ofNullable(((GroupNode) configurationNode).getGroups())
                 .orElseGet(Collections::emptyList)
                 .forEach(groupNode -> loadWithConfigurationNode(
                     Pipeliner.of(TreeItem<ConfigurationNode>::new)
@@ -57,7 +57,7 @@ import java.util.logging.Level;
                         .get(),
                     groupNode));
 
-            Optional.ofNullable(((ContainerNode) configurationNode).getSecureShellConnections())
+            Optional.ofNullable(((GroupNode) configurationNode).getConnections())
                 .orElseGet(Collections::emptyList)
                 .forEach(connectionNode -> loadWithConfigurationNode(
                     Pipeliner.of(TreeItem<ConfigurationNode>::new)
@@ -76,6 +76,10 @@ import java.util.logging.Level;
             Platform.runLater(() -> prepareAlert(() -> new Alert(Alert.AlertType.ERROR, message))
                 .show());
         }
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 
 }

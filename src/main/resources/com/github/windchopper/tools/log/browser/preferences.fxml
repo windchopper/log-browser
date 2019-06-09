@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.github.windchopper.tools.log.browser.actions.*?>
+<?import com.github.windchopper.tools.log.browser.configuration.*?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?language javascript?>
+
+<!--suppress JavaFxUnresolvedFxIdReference-->
+<!--suppress JSUnusedLocalSymbols-->
+
+<GridPane xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.PreferencesStageController">
+</GridPane>

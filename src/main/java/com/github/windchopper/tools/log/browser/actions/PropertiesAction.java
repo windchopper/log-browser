@@ -8,10 +8,6 @@ public class PropertiesAction extends ConfigurationTreeAction {
 
     public PropertiesAction() {
         textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.properties"));
-        graphicProperty().set(Pipeliner.of(ImageView::new)
-            .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/preferences-16.png"))
-            .get());
-
         setHandler(event -> {
 
         });
