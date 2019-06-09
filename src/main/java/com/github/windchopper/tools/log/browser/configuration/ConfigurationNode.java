@@ -5,12 +5,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType
-@XmlAccessorType(XmlAccessType.FIELD)
-public abstract class ConfigurationNode {
+@XmlType @XmlAccessorType(XmlAccessType.FIELD) public abstract class ConfigurationNode {
 
-    @XmlAttribute(name = "name")
-    private String name;
+    @XmlAttribute(name = "name") private String name;
 
     public String getName() {
         return name;

@@ -3,6 +3,7 @@ package com.github.windchopper.tools.log.browser.actions;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionNode;
+import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
 import com.github.windchopper.tools.log.browser.configuration.GroupNode;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
@@ -21,7 +22,7 @@ public class NewGroupAction extends ConfigurationTreeAction {
             .get());
 
         setHandler(event -> {
-            GroupNode groupNode = new GroupNode();
+            GroupNode groupNode = ((ContainerNode) parentItem.getValue()).addGroup();
             groupNode.setName("New group #" + System.currentTimeMillis());
 
             TreeItem<ConfigurationNode> connectionNodeItem = new TreeItem<>();
@@ -44,6 +45,8 @@ public class NewGroupAction extends ConfigurationTreeAction {
 
             selectionModel.clearSelection();
             selectionModel.select(connectionNodeItem);
+
+            mainStageController.saveConfiguration();
         });
     }
 

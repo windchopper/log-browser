@@ -6,6 +6,7 @@ module windchopper.tools.log.browser {
     opens com.github.windchopper.tools.log.browser.i18n;
     opens com.github.windchopper.tools.log.browser.images;
 
+    requires java.annotation;
     requires java.logging;
     requires java.prefs;
     requires java.xml.bind;

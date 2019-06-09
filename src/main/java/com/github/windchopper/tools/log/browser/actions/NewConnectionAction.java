@@ -3,6 +3,7 @@ package com.github.windchopper.tools.log.browser.actions;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionNode;
+import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
@@ -17,11 +18,11 @@ public class NewConnectionAction extends ConfigurationTreeAction {
     public NewConnectionAction() {
         textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"));
         graphicProperty().set(Pipeliner.of(ImageView::new)
-            .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/index-new-16.png"))
+            .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/plug-new-16.png"))
             .get());
 
         setHandler(event -> {
-            ConnectionNode connectionNode = new ConnectionNode();
+            ConnectionNode connectionNode = ((ContainerNode) parentItem.getValue()).addConnection();
 
             if (sourceItem != null) {
                 connectionNode.setName("Copy #" + System.currentTimeMillis() + " of " + sourceItem.getValue().getName());
@@ -39,6 +40,8 @@ public class NewConnectionAction extends ConfigurationTreeAction {
 
             selectionModel.clearSelection();
             selectionModel.select(connectionNodeItem);
+
+            mainStageController.saveConfiguration();
         });
     }
 

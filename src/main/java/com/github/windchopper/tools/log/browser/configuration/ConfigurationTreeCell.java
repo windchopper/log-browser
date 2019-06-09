@@ -9,7 +9,7 @@ public class ConfigurationTreeCell extends TreeCell<ConfigurationNode> {
 
     private static final Image configurationImage = new Image("/com/github/windchopper/tools/log/browser/images/gear-16.png");
     private static final Image groupImage = new Image("/com/github/windchopper/tools/log/browser/images/box-16.png");
-    private static final Image connectionImage = new Image("/com/github/windchopper/tools/log/browser/images/index-16.png");
+    private static final Image connectionImage = new Image("/com/github/windchopper/tools/log/browser/images/plug-16.png");
 
     private final Builder<ImageView> configurationImageView = Builder.of(() -> new ImageView(configurationImage));
     private final Builder<ImageView> groupImageView = Builder.of(() -> new ImageView(groupImage));

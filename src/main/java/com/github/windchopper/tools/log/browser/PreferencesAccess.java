@@ -5,13 +5,15 @@ import com.github.windchopper.common.preferences.PreferencesEntry;
 import com.github.windchopper.common.preferences.PreferencesStorage;
 import com.github.windchopper.common.preferences.types.FlatType;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 import java.io.File;
 import java.time.Duration;
 import java.util.prefs.Preferences;
 
 import static java.util.function.Function.identity;
 
-public interface PreferencesAware {
+@ApplicationScoped @Named("PreferencesAccess") public class PreferencesAccess {
 
     Duration defaultBufferLifetime = Duration.ofMinutes(1);
     PreferencesStorage preferencesStorage = new PlatformPreferencesStorage(Preferences.userRoot().node("com/github/windchopper/tools/log/browser"));
