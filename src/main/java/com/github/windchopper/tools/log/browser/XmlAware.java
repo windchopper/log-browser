@@ -1,7 +1,7 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.util.BufferedReference;
-import com.github.windchopper.tools.log.browser.configuration.Configuration;
+import com.github.windchopper.tools.log.browser.configuration.ConfigurationRoot;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -12,11 +12,11 @@ import java.nio.file.Path;
 
 public interface XmlAware {
 
-    BufferedReference<JAXBContext, JAXBException> jaxbContextReference = new BufferedReference<>(() -> JAXBContext.newInstance(Configuration.class));
+    BufferedReference<JAXBContext, JAXBException> jaxbContextReference = new BufferedReference<>(() -> JAXBContext.newInstance(ConfigurationRoot.class));
 
-    default Configuration loadConfiguration(Path configurationFile) throws IOException, JAXBException {
+    default ConfigurationRoot loadConfiguration(Path configurationFile) throws IOException, JAXBException {
         try (Reader reader = Files.newBufferedReader(configurationFile)) {
-            return (Configuration) jaxbContextReference.get()
+            return (ConfigurationRoot) jaxbContextReference.get()
                 .createUnmarshaller()
                 .unmarshal(reader);
         }

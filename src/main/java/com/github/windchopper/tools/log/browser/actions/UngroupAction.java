@@ -1,10 +1,5 @@
 package com.github.windchopper.tools.log.browser.actions;
 
-import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
-import javafx.scene.control.TreeItem;
-
-import java.util.List;
-
 public class UngroupAction extends ConfigurationTreeAction {
 
     public UngroupAction() {
@@ -14,7 +9,7 @@ public class UngroupAction extends ConfigurationTreeAction {
         });
     }
 
-    @Override public void prepare(List<TreeItem<ConfigurationNode>> selectedItems) {
+    @Override public void prepare() {
 
     }
 

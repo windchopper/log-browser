@@ -1,20 +1,23 @@
 package com.github.windchopper.tools.log.browser.actions;
 
-import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
-import javafx.scene.control.TreeItem;
-
-import java.util.List;
+import com.github.windchopper.common.util.Pipeliner;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class PropertiesAction extends ConfigurationTreeAction {
 
     public PropertiesAction() {
         textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.properties"));
+        graphicProperty().set(Pipeliner.of(ImageView::new)
+            .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/preferences-16.png"))
+            .get());
+
         setHandler(event -> {
 
         });
     }
 
-    @Override public void prepare(List<TreeItem<ConfigurationNode>> selectedItems) {
+    @Override public void prepare() {
 
     }
 

@@ -8,13 +8,14 @@ import java.util.List;
 
 @XmlRootElement(name = "configuration")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Configuration extends ConfigurationNode {
+public class ConfigurationRoot extends ConfigurationNode implements ContainerNode {
 
     @XmlElement(name = "connection")
     private List<ConnectionNode> connections;
     @XmlElement(name = "group")
     private List<GroupNode> groups;
 
+    @Override
     public List<ConnectionNode> getConnections() {
         return connections;
     }
@@ -23,6 +24,7 @@ public class Configuration extends ConfigurationNode {
         this.connections = connections;
     }
 
+    @Override
     public List<GroupNode> getGroups() {
         return groups;
     }

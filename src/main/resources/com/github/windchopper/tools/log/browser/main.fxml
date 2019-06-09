@@ -5,12 +5,13 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <?language javascript?>
 
 <!--suppress JavaFxUnresolvedFxIdReference-->
-
+<!--suppress JSUnusedLocalSymbols-->
 <BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
@@ -21,15 +22,20 @@
                 <Insets top="2.0" bottom="4.0"/>
             </padding>
             <MenuButton text="%com.github.windchopper.tools.log.browser.main.configuration">
+                <graphic>
+                    <ImageView>
+                        <Image url="/com/github/windchopper/tools/log/browser/images/gear-16.png"/>
+                    </ImageView>
+                </graphic>
                 <items>
-                    <MenuItem fx:id="importConfigurationButton" text="%com.github.windchopper.tools.log.browser.main.importConfiguration"/>
-                    <MenuItem fx:id="exportConfigurationButton" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
+                    <MenuItem fx:id="importConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.importConfiguration"/>
+                    <MenuItem fx:id="exportConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
                 </items>
             </MenuButton>
         </ToolBar>
     </top>
     <fx:define>
-        <TreeItem fx:id="configurationTreeRoot"/>
+        <TreeItem fx:id="configurationTreeRoot" expanded="true"/>
         <ConfigurationTreeCellFactory fx:id="configurationTreeCellFactory"/>
     </fx:define>
     <center>
@@ -52,43 +58,28 @@
                     </ContextMenu>
                 </contextMenu>
             </TreeView>
-            <BorderPane>
-
-            </BorderPane>
+            <BorderPane fx:id="workareaPane"/>
         </SplitPane>
     </center>
     <fx:define>
-        <ImportConfigurationAction fx:id="importConfigurationAction"/>
-        <ExportConfigurationAction fx:id="exportConfigurationAction"/>
-        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView"/>
-        <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView"/>
-        <RemoveAction fx:id="removeAction" view="$configurationTreeView"/>
-        <GroupAction fx:id="groupAction" view="$configurationTreeView"/>
-        <UngroupAction fx:id="ungroupAction" view="$configurationTreeView"/>
-        <PropertiesAction fx:id="propertiesAction" view="$configurationTreeView"/>
+        <ImportConfigurationAction fx:id="importConfigurationAction" bindMenuItem="$importConfigurationMenuItem"/>
+        <ExportConfigurationAction fx:id="exportConfigurationAction" bindMenuItem="$exportConfigurationMenuItem"/>
+        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView" bindMenuItem="$newConnectionMenuItem"/>
+        <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView" bindMenuItem="$newGroupMenuItem"/>
+        <RemoveAction fx:id="removeAction" view="$configurationTreeView" bindMenuItem="$removeMenuItem"/>
+        <GroupAction fx:id="groupAction" view="$configurationTreeView" bindMenuItem="$groupMenuItem"/>
+        <UngroupAction fx:id="ungroupAction" view="$configurationTreeView" bindMenuItem="$ungroupMenuItem"/>
+        <PropertiesAction fx:id="propertiesAction" view="$configurationTreeView" bindMenuItem="$propertiesMenuItem"/>
     </fx:define>
     <fx:script><![CDATA[
         configurationTreeView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
 
-        importConfigurationAction.bind(importConfigurationButton);
-        exportConfigurationAction.bind(exportConfigurationButton);
-
-        newConnectionAction.bind(newConnectionMenuItem);
-        newGroupAction.bind(newGroupMenuItem);
-        removeAction.bind(removeMenuItem);
-        groupAction.bind(groupMenuItem);
-        ungroupAction.bind(ungroupMenuItem);
-        propertiesAction.bind(propertiesMenuItem);
+        var treeActions = [newConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
 
         function prepareTreeActions() {
-            var selectedItems = configurationTreeView.getSelectionModel().getSelectedItems();
-
-            newConnectionAction.prepare(selectedItems);
-            newGroupAction.prepare(selectedItems);
-            removeAction.prepare(selectedItems);
-            groupAction.prepare(selectedItems);
-            ungroupAction.prepare(selectedItems);
-            propertiesAction.prepare(selectedItems);
+            treeActions.forEach(function(treeAction) {
+                treeAction.prepare();
+            })
         }
     ]]></fx:script>
 </BorderPane>

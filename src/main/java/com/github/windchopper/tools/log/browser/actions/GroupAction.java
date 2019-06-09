@@ -14,7 +14,7 @@ public class GroupAction extends ConfigurationTreeAction {
         });
     }
 
-    @Override public void prepare(List<TreeItem<ConfigurationNode>> selectedItems) {
+    @Override public void prepare() {
 
     }
 
