@@ -9,19 +9,19 @@ import java.util.List;
 
 @XmlType(name = "grouping") @XmlAccessorType(XmlAccessType.FIELD) public class GroupNode extends ConfigurationNode implements ContainerNode {
 
-    @XmlElement(name = "connection") private List<ConnectionNode> connections;
+    @XmlElement(name = "connection") private List<SecureShellConnectionNode> secureShellConnections;
     @XmlElement(name = "group") private List<GroupNode> groups;
 
-    @Override public List<ConnectionNode> getConnections() {
-        if (connections == null) {
-            connections = new ArrayList<>();
+    @Override public List<SecureShellConnectionNode> getSecureShellConnections() {
+        if (secureShellConnections == null) {
+            secureShellConnections = new ArrayList<>();
         }
 
-        return connections;
+        return secureShellConnections;
     }
 
-    public void setConnections(List<ConnectionNode> connections) {
-        this.connections = connections;
+    public void setSecureShellConnections(List<SecureShellConnectionNode> secureShellConnections) {
+        this.secureShellConnections = secureShellConnections;
     }
 
     @Override public List<GroupNode> getGroups() {

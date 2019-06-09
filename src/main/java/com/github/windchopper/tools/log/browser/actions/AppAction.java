@@ -11,7 +11,7 @@ public class AppAction extends Action {
 
     static final ResourceBundle bundle = ResourceBundle.getBundle("com.github.windchopper.tools.log.browser.i18n.messages");
 
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    public static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     AppAction() {
         setExecutor(executor);

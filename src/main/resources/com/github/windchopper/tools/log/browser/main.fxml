@@ -40,12 +40,12 @@
     </fx:define>
     <center>
         <SplitPane dividerPositions="0.3">
-            <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory">
+            <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory" editable="true">
                 <fx:reference source="configurationTreeRoot"/>
                 <contextMenu>
                     <ContextMenu onShowing="prepareTreeActions()">
                         <items>
-                            <MenuItem fx:id="newConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"/>
+                            <MenuItem fx:id="newSecureShellConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newSecureShellConnection"/>
                             <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
                             <SeparatorMenuItem/>
                             <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
@@ -64,7 +64,7 @@
     <fx:define>
         <ImportConfigurationAction fx:id="importConfigurationAction" bindMenuItem="$importConfigurationMenuItem"/>
         <ExportConfigurationAction fx:id="exportConfigurationAction" bindMenuItem="$exportConfigurationMenuItem"/>
-        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView" bindMenuItem="$newConnectionMenuItem"/>
+        <NewSecureShellConnectionAction fx:id="newSecureShellConnectionAction" view="$configurationTreeView" bindMenuItem="$newSecureShellConnectionMenuItem"/>
         <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView" bindMenuItem="$newGroupMenuItem"/>
         <RemoveAction fx:id="removeAction" view="$configurationTreeView" bindMenuItem="$removeMenuItem"/>
         <GroupAction fx:id="groupAction" view="$configurationTreeView" bindMenuItem="$groupMenuItem"/>
@@ -74,7 +74,7 @@
     <fx:script><![CDATA[
         configurationTreeView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
 
-        var treeActions = [newConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
+        var treeActions = [newSecureShellConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
 
         function prepareTreeActions() {
             treeActions.forEach(function(treeAction) {

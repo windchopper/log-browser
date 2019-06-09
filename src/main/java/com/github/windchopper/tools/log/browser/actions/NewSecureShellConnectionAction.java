@@ -4,34 +4,35 @@ import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionNode;
 import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
+import com.github.windchopper.tools.log.browser.configuration.SecureShellConnectionNode;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class NewConnectionAction extends ConfigurationTreeAction {
+public class NewSecureShellConnectionAction extends ConfigurationTreeAction {
 
     private TreeItem<ConfigurationNode> parentItem;
     private TreeItem<ConfigurationNode> sourceItem;
 
-    public NewConnectionAction() {
-        textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"));
+    public NewSecureShellConnectionAction() {
+        textProperty().set(bundle.getString("com.github.windchopper.tools.log.browser.main.tree.menu.newSecureShellConnection"));
         graphicProperty().set(Pipeliner.of(ImageView::new)
             .set(view -> view::setImage, new Image("/com/github/windchopper/tools/log/browser/images/plug-new-16.png"))
             .get());
 
         setHandler(event -> {
-            ConnectionNode connectionNode = ((ContainerNode) parentItem.getValue()).addConnection();
+            SecureShellConnectionNode secureShellConnectionNode = ((ContainerNode) parentItem.getValue()).addSecureShellConnection();
 
             if (sourceItem != null) {
-                connectionNode.setName("Copy #" + System.currentTimeMillis() + " of " + sourceItem.getValue().getName());
+                secureShellConnectionNode.setName("Copy #" + System.currentTimeMillis() + " of " + sourceItem.getValue().getName());
             } else {
-                connectionNode.setName("New connection #" + System.currentTimeMillis());
+                secureShellConnectionNode.setName("New connection #" + System.currentTimeMillis());
             }
 
             TreeItem<ConfigurationNode> connectionNodeItem = new TreeItem<>();
-            connectionNodeItem.setValue(connectionNode);
+            connectionNodeItem.setValue(secureShellConnectionNode);
 
             parentItem.getChildren().add(connectionNodeItem);
             parentItem.setExpanded(true);

@@ -81,6 +81,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.pastdev</groupId>
+            <artifactId>jsch-nio</artifactId>
+            <version>1.0.12</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

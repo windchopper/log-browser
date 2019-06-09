@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface ContainerNode {
 
-    List<ConnectionNode> getConnections();
+    List<SecureShellConnectionNode> getSecureShellConnections();
 
-    default ConnectionNode addConnection() {
-        return Pipeliner.of(ConnectionNode::new)
-            .accept(getConnections()::add)
+    default SecureShellConnectionNode addSecureShellConnection() {
+        return Pipeliner.of(SecureShellConnectionNode::new)
+            .accept(getSecureShellConnections()::add)
             .get();
     }
 

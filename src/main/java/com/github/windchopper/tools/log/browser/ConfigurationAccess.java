@@ -9,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -17,13 +18,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 @ApplicationScoped @Named("ConfigurationAccess") public class ConfigurationAccess {
 
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com.github.windchopper.tools.log.browser.i18n.messages");
 
-    private JAXBContext jaxbContext;
+    private Marshaller marshaller;
 
     private Path configurationFile;
     private ConfigurationRoot configuration;
@@ -32,25 +32,28 @@ import java.util.logging.Logger;
         return configuration;
     }
 
-    public void setConfiguration(ConfigurationRoot configuration) {
-        this.configuration = configuration;
-    }
+    @PostConstruct private void afterConstruction() {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(ConfigurationRoot.class);
 
-    @PostConstruct private void afterConstruction() throws JAXBException, IOException {
-        jaxbContext = JAXBContext.newInstance(ConfigurationRoot.class);
+            marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-        configurationFile = KnownSystemProperties.userHomePath.get()
-            .orElseGet(() -> Paths.get(""))
-            .resolve(".log-browser/configuration.xml");
+            configurationFile = KnownSystemProperties.userHomePath.get()
+                .orElseGet(() -> Paths.get(""))
+                .resolve(".log-browser/configuration.xml");
 
-        try (Reader reader = Files.newBufferedReader(configurationFile)) {
-            configuration = (ConfigurationRoot) jaxbContext
-                .createUnmarshaller()
-                .unmarshal(reader);
-        }
+            try (Reader reader = Files.newBufferedReader(configurationFile)) {
+                configuration = (ConfigurationRoot) jaxbContext
+                    .createUnmarshaller()
+                    .unmarshal(reader);
+            }
 
-        if (StringUtils.isBlank(configuration.getName())) {
-            configuration.setName(bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration"));
+            if (StringUtils.isBlank(configuration.getName())) {
+                configuration.setName(bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration"));
+            }
+        } catch (Exception thrown) {
+            throw new IllegalStateException(thrown);
         }
     }
 
@@ -58,9 +61,7 @@ import java.util.logging.Logger;
         Path tempFile = Files.createTempFile("save-conf-temp-", ".xml");
 
         try (Writer writer = Files.newBufferedWriter(tempFile)) {
-            jaxbContext
-                .createMarshaller()
-                .marshal(configuration, writer);
+            marshaller.marshal(configuration, writer);
         }
 
         Files.move(

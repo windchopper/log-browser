@@ -23,6 +23,7 @@ module windchopper.tools.log.browser {
     requires weld.core.impl;
 
     requires org.apache.commons.lang3;
+    requires jsch.nio;
 
     requires windchopper.common;
 

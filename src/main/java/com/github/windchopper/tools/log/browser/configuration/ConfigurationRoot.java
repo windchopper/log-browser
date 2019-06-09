@@ -1,27 +1,36 @@
 package com.github.windchopper.tools.log.browser.configuration;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.github.windchopper.tools.log.browser.crypto.EncryptorSalt;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "configuration") @XmlAccessorType(XmlAccessType.FIELD) public class ConfigurationRoot extends ConfigurationNode implements ContainerNode {
 
-    @XmlElement(name = "connection") private List<ConnectionNode> connections;
+    @XmlAttribute(name = "salt") @XmlJavaTypeAdapter(EncryptorSalt.XmlJavaTypeAdapter.class) private EncryptorSalt salt;
+    @XmlElement(name = "ssh-connection") private List<SecureShellConnectionNode> secureShellConnections;
     @XmlElement(name = "group") private List<GroupNode> groups;
 
-    @Override public List<ConnectionNode> getConnections() {
-        if (connections == null) {
-            connections = new ArrayList<>();
-        }
-
-        return connections;
+    public EncryptorSalt getSalt() {
+        return salt;
     }
 
-    public void setConnections(List<ConnectionNode> connections) {
-        this.connections = connections;
+    public void setSalt(EncryptorSalt salt) {
+        this.salt = salt;
+    }
+
+    @Override public List<SecureShellConnectionNode> getSecureShellConnections() {
+        if (secureShellConnections == null) {
+            secureShellConnections = new ArrayList<>();
+        }
+
+        return secureShellConnections;
+    }
+
+    public void setSecureShellConnections(List<SecureShellConnectionNode> secureShellConnections) {
+        this.secureShellConnections = secureShellConnections;
     }
 
     @Override public List<GroupNode> getGroups() {
