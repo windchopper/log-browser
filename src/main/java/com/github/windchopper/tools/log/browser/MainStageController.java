@@ -14,7 +14,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -31,8 +30,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-
-import static java.util.Collections.emptyMap;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
 
@@ -76,20 +73,15 @@ import static java.util.Collections.emptyMap;
 
     @FXML private TreeView<ConfigurationElement> configurationTreeView;
     @FXML private TreeItem<ConfigurationElement> configurationTreeRoot;
-
     @FXML private MenuItem importConfigurationMenuItem;
     @FXML private MenuItem exportConfigurationMenuItem;
-
-    @FXML private Button setPasswordButton;
     @FXML private Button gatherButton;
-
     @FXML private MenuItem addGroupMenuItem;
     @FXML private MenuItem addConnectionMenuItem;
     @FXML private MenuItem removeMenuItem;
     @FXML private MenuItem groupMenuItem;
     @FXML private MenuItem ungroupMenuItem;
     @FXML private MenuItem propertiesMenuItem;
-
     @FXML private BorderPane workareaPane;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -157,18 +149,6 @@ import static java.util.Collections.emptyMap;
                 actionDisableProperty.set(false);
             }
         });
-    }
-
-    @FXML public void setPasswordPressed(ActionEvent event) {
-        fxmlResourceOpenEvent.fire(
-            new FXMLResourceOpen(
-                Pipeliner.of(Stage::new)
-                    .set(target -> target::initOwner, stage)
-                    .set(target -> target::initModality, Modality.APPLICATION_MODAL)
-                    .set(target -> target::setResizable, false)
-                    .get(),
-                Globals.FXML__PASSWORD,
-                emptyMap()));
     }
 
     @FXML public void gatherPressed(ActionEvent event) {

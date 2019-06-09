@@ -9,8 +9,7 @@ import java.util.prefs.Preferences;
 public interface Globals {
 
     String FXML__MAIN = "com/github/windchopper/tools/log/browser/main.fxml";
-    String FXML__PASSWORD = "com/github/windchopper/tools/log/browser/password.fxml";
-    String FXML__PREFERENCES = "com/github/windchopper/tools/log/browser/preferences.fxml";
+    String FXML__EDIT = "com/github/windchopper/tools/log/browser/edit.fxml";
 
     ResourceBundle bundle = ResourceBundle.getBundle("com.github.windchopper.tools.log.browser.i18n.messages");
 

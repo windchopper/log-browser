@@ -21,7 +21,6 @@
                 </items>
             </MenuButton>
             <Separator/>
-            <Button fx:id="setPasswordButton" text="%com.github.windchopper.tools.log.browser.main.setPassword" onAction="#setPasswordPressed"/>
             <Button fx:id="gatherButton" text="%com.github.windchopper.tools.log.browser.main.gather" onAction="#gatherPressed"/>
         </ToolBar>
     </top>
