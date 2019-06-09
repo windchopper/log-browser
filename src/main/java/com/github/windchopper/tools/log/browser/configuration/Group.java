@@ -9,12 +9,12 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlType(name = "group") @XmlAccessorType(XmlAccessType.FIELD) public class GroupNode extends ConfigurationNode {
+@XmlType(name = "group") @XmlAccessorType(XmlAccessType.FIELD) public class Group extends ConfigurationElement {
 
-    @XmlElement(name = "connection") private List<ConnectionNode> connections;
-    @XmlElement(name = "group") private List<GroupNode> groups;
+    @XmlElement(name = "connection") private List<Connection> connections;
+    @XmlElement(name = "group") private List<Group> groups;
 
-    public List<ConnectionNode> getConnections() {
+    public List<Connection> getConnections() {
         if (connections == null) {
             connections = new ArrayList<>();
         }
@@ -22,17 +22,17 @@ import java.util.List;
         return connections;
     }
 
-    public void setConnections(List<ConnectionNode> connections) {
+    public void setConnections(List<Connection> connections) {
         this.connections = connections;
     }
 
-    public ConnectionNode addConnection() {
-        return Pipeliner.of(ConnectionNode::new)
+    public Connection addConnection() {
+        return Pipeliner.of(Connection::new)
             .accept(getConnections()::add)
             .get();
     }
 
-    public List<GroupNode> getGroups() {
+    public List<Group> getGroups() {
         if (groups == null) {
             groups = new ArrayList<>();
         }
@@ -40,12 +40,12 @@ import java.util.List;
         return groups;
     }
 
-    public void setGroups(List<GroupNode> groups) {
+    public void setGroups(List<Group> groups) {
         this.groups = groups;
     }
 
-    public GroupNode addGroup() {
-        return Pipeliner.of(GroupNode::new)
+    public Group addGroup() {
+        return Pipeliner.of(Group::new)
             .accept(getGroups()::add)
             .get();
     }

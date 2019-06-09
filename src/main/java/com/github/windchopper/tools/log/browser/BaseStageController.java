@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.singletonList;
 
-abstract class AnyStageController extends StageController {
+abstract class BaseStageController extends StageController {
 
     private static final Image iconImage = new Image("/com/github/windchopper/tools/log/browser/images/scroll-48.png");
 

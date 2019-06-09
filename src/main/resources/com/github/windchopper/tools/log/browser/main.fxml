@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import com.github.windchopper.tools.log.browser.actions.*?>
-<?import com.github.windchopper.tools.log.browser.configuration.*?>
-
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<?language javascript?>
-
 <!--suppress JavaFxUnresolvedFxIdReference-->
 <!--suppress JSUnusedLocalSymbols-->
-
+<?import com.github.windchopper.tools.log.browser.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
 <BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
@@ -27,25 +20,26 @@
                     <MenuItem fx:id="exportConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
                 </items>
             </MenuButton>
-            <Button fx:id="setPasswordButton"/>
-            <Button fx:id="gatherButton"/>
+            <Separator/>
+            <Button fx:id="setPasswordButton" text="%com.github.windchopper.tools.log.browser.main.setPassword" onAction="#setPasswordPressed"/>
+            <Button fx:id="gatherButton" text="%com.github.windchopper.tools.log.browser.main.gather" onAction="#gatherPressed"/>
         </ToolBar>
     </top>
     <fx:define>
         <TreeItem fx:id="configurationTreeRoot" expanded="true"/>
-        <ConfigurationTreeCellFactory fx:id="configurationTreeCellFactory"/>
+        <MainStageController.ConfigurationTreeCellFactory fx:id="configurationTreeCellFactory"/>
     </fx:define>
     <center>
         <SplitPane dividerPositions="0.3">
             <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory" editable="true">
                 <fx:reference source="configurationTreeRoot"/>
                 <contextMenu>
-                    <ContextMenu onShowing="prepareTreeActions()">
+                    <ContextMenu onShowing="#contextMenuShowing">
                         <items>
-                            <Menu text="%com.github.windchopper.tools.log.browser.main.tree.menu.new">
-                                <MenuItem fx:id="newGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newGroup"/>
+                            <Menu text="%com.github.windchopper.tools.log.browser.main.tree.menu.add">
+                                <MenuItem fx:id="addGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addGroup" onAction="#addGroupSelected"/>
                                 <SeparatorMenuItem/>
-                                <MenuItem fx:id="newConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.newConnection"/>
+                                <MenuItem fx:id="addConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addConnection" onAction="#addConnectionSelected"/>
                             </Menu>
                             <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
                             <SeparatorMenuItem/>
@@ -60,27 +54,4 @@
             <BorderPane fx:id="workareaPane"/>
         </SplitPane>
     </center>
-    <fx:define>
-        <ImportConfigurationAction fx:id="importConfigurationAction" bindMenuItem="$importConfigurationMenuItem"/>
-        <ExportConfigurationAction fx:id="exportConfigurationAction" bindMenuItem="$exportConfigurationMenuItem"/>
-        <SetPasswordAction fx:id="setPasswordAction" bindButton="$setPasswordButton"/>
-        <GatherAction fx:id="gatherAction" bindButton="$gatherButton"/>
-        <NewConnectionAction fx:id="newConnectionAction" view="$configurationTreeView" bindMenuItem="$newConnectionMenuItem"/>
-        <NewGroupAction fx:id="newGroupAction" view="$configurationTreeView" bindMenuItem="$newGroupMenuItem"/>
-        <RemoveAction fx:id="removeAction" view="$configurationTreeView" bindMenuItem="$removeMenuItem"/>
-        <GroupAction fx:id="groupAction" view="$configurationTreeView" bindMenuItem="$groupMenuItem"/>
-        <UngroupAction fx:id="ungroupAction" view="$configurationTreeView" bindMenuItem="$ungroupMenuItem"/>
-        <PropertiesAction fx:id="propertiesAction" view="$configurationTreeView" bindMenuItem="$propertiesMenuItem"/>
-    </fx:define>
-    <fx:script><![CDATA[
-        configurationTreeView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
-
-        var treeActions = [newConnectionAction, newGroupAction, removeAction, groupAction, ungroupAction, propertiesAction];
-
-        function prepareTreeActions() {
-            treeActions.forEach(function(treeAction) {
-                treeAction.prepare();
-            })
-        }
-    ]]></fx:script>
 </BorderPane>

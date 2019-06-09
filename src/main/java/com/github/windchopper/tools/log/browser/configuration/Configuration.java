@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlRootElement(name = "configuration") @XmlAccessorType(XmlAccessType.FIELD) public class Configuration extends GroupNode {
+@XmlRootElement(name = "configuration") @XmlAccessorType(XmlAccessType.FIELD) public class Configuration extends Group {
 
     @XmlAttribute(name = "salt") @XmlJavaTypeAdapter(Salt.XmlJavaTypeAdapter.class) private Salt salt;
 

@@ -17,11 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ResourceBundle;
 
 @ApplicationScoped @Named("ConfigurationAccess") public class ConfigurationAccess {
-
-    private static final ResourceBundle bundle = ResourceBundle.getBundle("com.github.windchopper.tools.log.browser.i18n.messages");
 
     private Marshaller marshaller;
 
@@ -50,7 +47,7 @@ import java.util.ResourceBundle;
             }
 
             if (StringUtils.isBlank(configuration.getName())) {
-                configuration.setName(bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration"));
+                configuration.setName(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration"));
             }
         } catch (Exception thrown) {
             throw new IllegalStateException(thrown);

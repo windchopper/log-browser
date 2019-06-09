@@ -5,5 +5,5 @@ import com.github.windchopper.common.fx.annotation.FXMLResource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 
-@ApplicationScoped @FXMLResource(Forms.FXML__PREFERENCES) @Named("PreferencesStageController") public class PreferencesStageController extends AnyStageController {
+@ApplicationScoped @FXMLResource(Globals.FXML__PREFERENCES) @Named("PreferencesStageController") public class PreferencesStageController extends BaseStageController {
 }
