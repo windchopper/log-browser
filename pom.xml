@@ -82,9 +82,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.pastdev</groupId>
-            <artifactId>jsch-nio</artifactId>
-            <version>1.0.12</version>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
         </dependency>
     </dependencies>
     <build>

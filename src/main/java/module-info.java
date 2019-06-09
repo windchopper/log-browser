@@ -3,6 +3,7 @@ module windchopper.tools.log.browser {
     opens com.github.windchopper.tools.log.browser;
     opens com.github.windchopper.tools.log.browser.actions;
     opens com.github.windchopper.tools.log.browser.configuration;
+    opens com.github.windchopper.tools.log.browser.crypto;
     opens com.github.windchopper.tools.log.browser.i18n;
     opens com.github.windchopper.tools.log.browser.images;
 
@@ -23,7 +24,7 @@ module windchopper.tools.log.browser {
     requires weld.core.impl;
 
     requires org.apache.commons.lang3;
-    requires jsch.nio;
+    requires jsch;
 
     requires windchopper.common;
 

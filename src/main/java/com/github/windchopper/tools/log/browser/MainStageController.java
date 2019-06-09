@@ -5,6 +5,7 @@ import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.actions.AppAction;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationNode;
 import com.github.windchopper.tools.log.browser.configuration.ContainerNode;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TreeItem;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 @ApplicationScoped @FXMLResource(Forms.FXML__MAIN) @Named("MainStageController") public class MainStageController extends AnyStageController {
 
@@ -69,8 +71,10 @@ import java.util.ResourceBundle;
         try {
             configurationAccess.saveConfiguration();
         } catch (Exception thrown) {
-            prepareAlert(() -> new Alert(Alert.AlertType.ERROR, ExceptionUtils.getRootCauseMessage(thrown)))
-                .show();
+            String message = ExceptionUtils.getRootCauseMessage(thrown);
+            logger.log(Level.SEVERE, message, thrown);
+            Platform.runLater(() -> prepareAlert(() -> new Alert(Alert.AlertType.ERROR, message))
+                .show());
         }
     }
 

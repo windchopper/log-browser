@@ -31,11 +31,11 @@ public class EncryptorSalt {
     public static class XmlJavaTypeAdapter extends XmlAdapter<String, EncryptorSalt> {
 
         @Override public String marshal(EncryptorSalt salt) {
-            return salt.base64EncodedString();
+            return salt == null ? null : salt.base64EncodedString();
         }
 
         @Override public EncryptorSalt unmarshal(String base64EncodedSalt) {
-            return new EncryptorSalt(Base64.getDecoder().decode(base64EncodedSalt));
+            return base64EncodedSalt == null ? null : new EncryptorSalt(Base64.getDecoder().decode(base64EncodedSalt));
         }
 
     }
