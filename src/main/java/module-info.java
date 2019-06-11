@@ -2,7 +2,6 @@ module windchopper.tools.log.browser {
 
     opens com.github.windchopper.tools.log.browser;
     opens com.github.windchopper.tools.log.browser.configuration;
-    opens com.github.windchopper.tools.log.browser.crypto;
     opens com.github.windchopper.tools.log.browser.i18n;
     opens com.github.windchopper.tools.log.browser.images;
 

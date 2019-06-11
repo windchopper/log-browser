@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -30,6 +31,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
+
+import static java.util.Collections.emptyMap;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
 
@@ -210,6 +213,15 @@ import java.util.logging.Level;
             selectionModel.select(connectionItem);
 
             saveConfiguration();
+
+            fxmlResourceOpenEvent.fire(
+                new FXMLResourceOpen(
+                    Pipeliner.of(Stage::new)
+                        .set(connectionStage -> connectionStage::initOwner, stage)
+                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
+                        .get(),
+                    Globals.FXML__CONNECTION,
+                    Map.of("connection", connection)));
         }
     }
 

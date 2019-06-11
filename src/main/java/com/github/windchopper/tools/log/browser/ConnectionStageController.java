@@ -1,9 +1,33 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.annotation.FXMLResource;
+import com.github.windchopper.tools.log.browser.configuration.Connection;
+import javafx.fxml.FXML;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import java.util.Map;
 
-@ApplicationScoped @FXMLResource(Globals.FXML__EDIT) @Named("PreferencesStageController") public class ConnectionStageController extends BaseStageController {
+@ApplicationScoped @FXMLResource(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
+
+    @FXML private TextField nameField;
+    @FXML private TextField hostField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+
+    private Connection connection;
+
+    @Override protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
+        super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
+
+        connection = (Connection) parameters.get("connection");
+
+        if (connection != null) {
+            nameField.setText(connection.getName());
+        }
+    }
+
 }

@@ -6,27 +6,63 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.*?>
-<GridPane prefWidth="400.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
-    <Label GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" text="%com.github.windchopper.tools.log.browser.enterPassword" wrapText="true">
+<?import javafx.scene.control.TextField?>
+<GridPane prefWidth="500.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="%com.github.windchopper.tools.log.browser.connection.name">
         <GridPane.margin>
             <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
         </GridPane.margin>
     </Label>
-    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS">
+    <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </TextField>
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="1" text="%com.github.windchopper.tools.log.browser.connection.host">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </Label>
+    <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </TextField>
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="2" text="%com.github.windchopper.tools.log.browser.connection.user">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </Label>
+    <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </TextField>
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="3" text="%com.github.windchopper.tools.log.browser.connection.password">
+        <GridPane.margin>
+            <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
+        </GridPane.margin>
+    </Label>
+    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS">
         <GridPane.margin>
             <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
         </GridPane.margin>
     </PasswordField>
-    <HBox GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+    <HBox GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" alignment="CENTER_RIGHT">
         <GridPane.margin>
             <Insets top="10.0" left="10.0" bottom="10.0" right="10.0"/>
         </GridPane.margin>
-        <Button fx:id="okButton" text="%com.github.windchopper.tools.log.browser.ok" defaultButton="true" minWidth="100.0">
+        <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" defaultButton="true" minWidth="100.0">
             <HBox.margin>
                 <Insets left="4.0"/>
             </HBox.margin>
         </Button>
-        <Button fx:id="browseButton" text="%com.github.windchopper.tools.log.browser.cancel" minWidth="100.0">
+        <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0">
+            <HBox.margin>
+                <Insets left="4.0"/>
+            </HBox.margin>
+        </Button>
+        <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" minWidth="100.0">
             <HBox.margin>
                 <Insets left="4.0"/>
             </HBox.margin>
