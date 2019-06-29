@@ -21,9 +21,11 @@ module windchopper.tools.log.browser {
     requires weld.environment.common;
     requires weld.core.impl;
 
+    requires windchopper.common;
     requires org.apache.commons.lang3;
     requires jsch;
-
-    requires windchopper.common;
+    requires jsch.nio;
+    requires sftp.fs;
+    requires ftp.fs;
 
 }

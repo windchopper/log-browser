@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
     @XmlElement(name = "type") private ConnectionType type;
     @XmlElement(name = "host") private String host;
+    @XmlElement(name = "port") private int port;
     @XmlElement(name = "username") private String username;
     @XmlElement(name = "password") private String password;
 
@@ -26,6 +27,14 @@ import javax.xml.bind.annotation.XmlType;
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public String getUsername() {
