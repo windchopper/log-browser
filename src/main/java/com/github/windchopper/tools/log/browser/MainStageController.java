@@ -13,14 +13,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Callback;
-import javafx.util.StringConverter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,41 +30,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.function.Predicate.not;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
-
-    public static class ConfigurationTreeCell extends TextFieldTreeCell<ConfigurationElement> {
-
-        ConfigurationTreeCell() {
-            super(new StringConverter<>() {
-
-                ConfigurationElement configurationElement;
-
-                @Override public String toString(ConfigurationElement configurationElement) {
-                    this.configurationElement = configurationElement;
-                    return configurationElement.getName();
-                }
-
-                @Override public ConfigurationElement fromString(String string) {
-                    configurationElement.setName(string);
-                    return configurationElement;
-                }
-
-            });
-        }
-
-        @Override public void updateItem(ConfigurationElement configurationElement, boolean empty) {
-            super.updateItem(configurationElement, empty);
-            setText(configurationElement == null ? null : configurationElement.getName());
-        }
-
-    }
 
     @Inject private Event<FXMLResourceOpen> fxmlResourceOpenEvent;
     @Inject private ConfigurationAccess configurationAccess;
@@ -96,7 +64,7 @@ import static java.util.function.Predicate.not;
         loadWithConfigurationNode(configurationTreeRoot, configurationAccess.getConfiguration());
 
         configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        configurationTreeView.setCellFactory(view -> new ConfigurationTreeCell());
+        configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item) -> cell.setText(item.getName())));
         configurationTreeView.setOnEditCommit(editEvent -> executor.execute(this::saveConfiguration));
     }
 
@@ -141,10 +109,9 @@ import static java.util.function.Predicate.not;
             .filter(not(item -> item instanceof Connection))
             .count());
         addConnectionMenuItem.setDisable(1 != selectedItems.size());
-        removeMenuItem.setDisable(1 <= selectedItems.stream()
+        removeMenuItem.setDisable(selectedItems.isEmpty() || selectedItems.stream()
             .map(TreeItem::getValue)
-            .filter(not(item -> item instanceof Configuration))
-            .count());
+            .anyMatch(item -> item instanceof Configuration));
         propertiesMenuItem.setDisable(1 != selectedItems.stream()
             .map(TreeItem::getValue)
             .filter(not(item -> item instanceof Configuration))
@@ -153,14 +120,35 @@ import static java.util.function.Predicate.not;
 
     private void runWithExecutor(BooleanProperty actionDisableProperty, Runnable action) {
         executor.execute(() -> {
+            stage.getScene().setCursor(Cursor.WAIT);
             actionDisableProperty.set(true);
 
             try {
                 action.run();
             } finally {
                 actionDisableProperty.set(false);
+                stage.getScene().setCursor(Cursor.DEFAULT);
             }
         });
+    }
+
+    private void openWindow(String fxmlResource, String parameterName, Object parameter) {
+        fxmlResourceOpenEvent.fire(
+            new FXMLResourceOpen(
+                Pipeliner.of(Stage::new)
+                    .set(connectionStage -> connectionStage::initOwner, stage)
+                    .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
+                    .get(),
+                fxmlResource,
+                Map.of(parameterName, parameter)));
+    }
+
+    private void openConnectionWindow(Connection connection) {
+        openWindow(Globals.FXML__CONNECTION, "connection", connection);
+    }
+
+    private void openGroupWindow(Group group) {
+        openWindow(Globals.FXML__GROUP, "group", group);
     }
 
     @FXML public void gatherPressed(ActionEvent event) {
@@ -201,6 +189,8 @@ import static java.util.function.Predicate.not;
             selectionModel.select(connectionItem);
 
             saveConfiguration();
+
+            openGroupWindow(group);
         }
     }
 
@@ -223,14 +213,7 @@ import static java.util.function.Predicate.not;
 
             saveConfiguration();
 
-            fxmlResourceOpenEvent.fire(
-                new FXMLResourceOpen(
-                    Pipeliner.of(Stage::new)
-                        .set(connectionStage -> connectionStage::initOwner, stage)
-                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
-                        .get(),
-                    Globals.FXML__CONNECTION,
-                    Map.of("connection", connection)));
+            openConnectionWindow(connection);
         }
     }
 
@@ -238,23 +221,9 @@ import static java.util.function.Predicate.not;
         TreeItem<ConfigurationElement> selectedItem = configurationTreeView.getSelectionModel().getSelectedItem();
 
         if (selectedItem.getValue() instanceof Connection) {
-            fxmlResourceOpenEvent.fire(
-                new FXMLResourceOpen(
-                    Pipeliner.of(Stage::new)
-                        .set(connectionStage -> connectionStage::initOwner, stage)
-                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
-                        .get(),
-                    Globals.FXML__CONNECTION,
-                    Map.of("connection", selectedItem.getValue())));
+            openConnectionWindow((Connection) selectedItem.getValue());
         } else if (selectedItem.getValue() instanceof Group) {
-            fxmlResourceOpenEvent.fire(
-                new FXMLResourceOpen(
-                    Pipeliner.of(Stage::new)
-                        .set(connectionStage -> connectionStage::initOwner, stage)
-                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
-                        .get(),
-                    Globals.FXML__GROUP,
-                    Map.of("group", selectedItem.getValue())));
+            openGroupWindow((Group) selectedItem.getValue());
         }
     }
 
