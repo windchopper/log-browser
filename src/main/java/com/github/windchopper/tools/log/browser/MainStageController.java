@@ -225,4 +225,19 @@ import static java.util.Collections.emptyMap;
         }
     }
 
+    @FXML public void propertiesSelected(ActionEvent event) {
+        TreeItem<ConfigurationElement> selectedItem = configurationTreeView.getSelectionModel().getSelectedItem();
+
+        if (selectedItem.getValue() instanceof Connection) {
+            fxmlResourceOpenEvent.fire(
+                new FXMLResourceOpen(
+                    Pipeliner.of(Stage::new)
+                        .set(connectionStage -> connectionStage::initOwner, stage)
+                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
+                        .get(),
+                    Globals.FXML__CONNECTION,
+                    Map.of("connection", selectedItem.getValue())));
+        }
+    }
+
 }

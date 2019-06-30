@@ -18,24 +18,26 @@
     <fx:define>
         <ConnectionStageController.ConnectionTypeListCellFactory fx:id="connectionTypeListCellFactory"/>
     </fx:define>
-    <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" cellFactory="$connectionTypeListCellFactory"/>
+    <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" cellFactory="$connectionTypeListCellFactory" onAction="#typeSelected"/>
     <Label GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
     <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
-    <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
-    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <HBox GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets">
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+    <Spinner fx:id="portSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
+    <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
+    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <HBox GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets">
         <fx:define>
             <Insets fx:id="leftButtonInsets"/>
             <Insets left="4.0" fx:id="rightButtonInsets"/>
         </fx:define>
         <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets"/>
+            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#testSelected"/>
         </HBox>
         <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets"/>
-            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" minWidth="100.0" HBox.margin="$rightButtonInsets"/>
+            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#saveSelected"/>
+            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#cancelSelected"/>
         </HBox>
     </HBox>
 </GridPane>

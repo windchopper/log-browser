@@ -4,7 +4,7 @@
 <?import com.github.windchopper.tools.log.browser.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.*?>
 <BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
@@ -45,7 +45,7 @@
                             <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group"/>
                             <MenuItem fx:id="ungroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.ungroup"/>
                             <SeparatorMenuItem/>
-                            <MenuItem fx:id="propertiesMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.properties"/>
+                            <MenuItem fx:id="propertiesMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.properties" onAction="#propertiesSelected"/>
                         </items>
                     </ContextMenu>
                 </contextMenu>
