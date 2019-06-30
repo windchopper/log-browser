@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--suppress JavaFxUnresolvedFxIdReference-->
 <!--suppress JSUnusedLocalSymbols-->
-<?import com.github.windchopper.tools.log.browser.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -15,10 +14,7 @@
     <Label GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.name"/>
     <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
     <Label GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.type"/>
-    <fx:define>
-        <ConnectionStageController.ConnectionTypeListCellFactory fx:id="connectionTypeListCellFactory"/>
-    </fx:define>
-    <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" cellFactory="$connectionTypeListCellFactory" onAction="#typeSelected"/>
+    <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
     <Label GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
     <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
     <Label GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>

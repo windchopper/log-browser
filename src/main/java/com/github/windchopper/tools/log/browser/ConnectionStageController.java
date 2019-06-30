@@ -1,5 +1,6 @@
 package com.github.windchopper.tools.log.browser;
 
+import com.github.windchopper.common.fx.CellFactories;
 import com.github.windchopper.common.fx.DelegatingStringConverter;
 import com.github.windchopper.common.fx.annotation.FXMLResource;
 import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory;
@@ -49,6 +50,7 @@ import java.util.Map;
 
         typeBox.getItems().addAll(ConnectionType.values());
         typeBox.setConverter(new DelegatingStringConverter<>(connectionType -> connectionType == null ? "" : String.format("%s (%s)", connectionType.description(), connectionType.title())));
+        typeBox.setCellFactory(CellFactories.listCellFactory((cell, connectionType) -> cell.setText(String.format("%s (%s)", connectionType.description(), connectionType.title()))));
 
         portSpinner.setValueFactory(new FlexibleSpinnerValueFactory<>(NumberType.INTEGER, 0, 65535, 0));
 

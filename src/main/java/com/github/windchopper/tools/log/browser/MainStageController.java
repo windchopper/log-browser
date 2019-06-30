@@ -1,8 +1,10 @@
 package com.github.windchopper.tools.log.browser;
 
+import com.github.windchopper.common.fx.CellFactories;
 import com.github.windchopper.common.fx.annotation.FXMLResource;
 import com.github.windchopper.common.fx.event.FXMLResourceOpen;
 import com.github.windchopper.common.util.Pipeliner;
+import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.Group;
@@ -30,9 +32,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.function.Predicate.not;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
 
@@ -59,14 +64,6 @@ import static java.util.Collections.emptyMap;
         @Override public void updateItem(ConfigurationElement configurationElement, boolean empty) {
             super.updateItem(configurationElement, empty);
             setText(configurationElement == null ? null : configurationElement.getName());
-        }
-
-    }
-
-    public static class ConfigurationTreeCellFactory implements Callback<TreeView<ConfigurationElement>, TreeCell<ConfigurationElement>> {
-
-        @Override public TreeCell<ConfigurationElement> call(TreeView<ConfigurationElement> view) {
-            return new ConfigurationTreeCell();
         }
 
     }
@@ -99,6 +96,7 @@ import static java.util.Collections.emptyMap;
         loadWithConfigurationNode(configurationTreeRoot, configurationAccess.getConfiguration());
 
         configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        configurationTreeView.setCellFactory(view -> new ConfigurationTreeCell());
         configurationTreeView.setOnEditCommit(editEvent -> executor.execute(this::saveConfiguration));
     }
 
@@ -138,8 +136,19 @@ import static java.util.Collections.emptyMap;
     @FXML public void contextMenuShowing(WindowEvent event) {
         ObservableList<TreeItem<ConfigurationElement>> selectedItems = configurationTreeView.getSelectionModel().getSelectedItems();
 
-        addGroupMenuItem.setDisable(selectedItems.size() != 1 || selectedItems.get(0).getValue() instanceof Connection);
-        addConnectionMenuItem.setDisable(selectedItems.size() != 1);
+        addGroupMenuItem.setDisable(1 != selectedItems.stream()
+            .map(TreeItem::getValue)
+            .filter(not(item -> item instanceof Connection))
+            .count());
+        addConnectionMenuItem.setDisable(1 != selectedItems.size());
+        removeMenuItem.setDisable(1 <= selectedItems.stream()
+            .map(TreeItem::getValue)
+            .filter(not(item -> item instanceof Configuration))
+            .count());
+        propertiesMenuItem.setDisable(1 != selectedItems.stream()
+            .map(TreeItem::getValue)
+            .filter(not(item -> item instanceof Configuration))
+            .count());
     }
 
     private void runWithExecutor(BooleanProperty actionDisableProperty, Runnable action) {
@@ -237,6 +246,15 @@ import static java.util.Collections.emptyMap;
                         .get(),
                     Globals.FXML__CONNECTION,
                     Map.of("connection", selectedItem.getValue())));
+        } else if (selectedItem.getValue() instanceof Group) {
+            fxmlResourceOpenEvent.fire(
+                new FXMLResourceOpen(
+                    Pipeliner.of(Stage::new)
+                        .set(connectionStage -> connectionStage::initOwner, stage)
+                        .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
+                        .get(),
+                    Globals.FXML__GROUP,
+                    Map.of("group", selectedItem.getValue())));
         }
     }
 

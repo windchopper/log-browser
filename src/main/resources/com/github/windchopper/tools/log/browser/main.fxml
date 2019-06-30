@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--suppress JavaFxUnresolvedFxIdReference-->
 <!--suppress JSUnusedLocalSymbols-->
-<?import com.github.windchopper.tools.log.browser.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -26,11 +25,10 @@
     </top>
     <fx:define>
         <TreeItem fx:id="configurationTreeRoot" expanded="true"/>
-        <MainStageController.ConfigurationTreeCellFactory fx:id="configurationTreeCellFactory"/>
     </fx:define>
     <center>
         <SplitPane dividerPositions="0.3">
-            <TreeView fx:id="configurationTreeView" cellFactory="$configurationTreeCellFactory" editable="true">
+            <TreeView fx:id="configurationTreeView" editable="true">
                 <fx:reference source="configurationTreeRoot"/>
                 <contextMenu>
                     <ContextMenu onShowing="#contextMenuShowing">
