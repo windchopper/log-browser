@@ -3,6 +3,7 @@ package com.github.windchopper.tools.log.browser;
 import com.github.windchopper.common.fx.CellFactories;
 import com.github.windchopper.common.fx.annotation.FXMLResource;
 import com.github.windchopper.common.fx.event.FXMLResourceOpen;
+import com.github.windchopper.common.util.Builder;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
@@ -13,7 +14,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -23,13 +23,13 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import static java.util.function.Predicate.not;
@@ -37,10 +37,13 @@ import static java.util.function.Predicate.not;
 @ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
 
     @Inject private Event<FXMLResourceOpen> fxmlResourceOpenEvent;
+    @Inject private Event<SaveConfiguration> saveConfigurationEvent;
     @Inject private ConfigurationAccess configurationAccess;
+    @Inject private AsyncRunner asyncRunner;
 
     @FXML private TreeView<ConfigurationElement> configurationTreeView;
     @FXML private TreeItem<ConfigurationElement> configurationTreeRoot;
+    @FXML private MenuButton configurationButton;
     @FXML private MenuItem importConfigurationMenuItem;
     @FXML private MenuItem exportConfigurationMenuItem;
     @FXML private Button gatherButton;
@@ -52,20 +55,17 @@ import static java.util.function.Predicate.not;
     @FXML private MenuItem propertiesMenuItem;
     @FXML private BorderPane workareaPane;
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
     @Override
     protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
         super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
 
         stage.setTitle(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.title"));
-        stage.setOnCloseRequest(event -> executor.shutdown());
 
         loadWithConfigurationNode(configurationTreeRoot, configurationAccess.getConfiguration());
 
         configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item) -> cell.setText(item.getName())));
-        configurationTreeView.setOnEditCommit(editEvent -> executor.execute(this::saveConfiguration));
+        configurationTreeView.setOnEditCommit(editEvent -> saveConfigurationEvent.fire(new SaveConfiguration()));
     }
 
     private <T extends ConfigurationElement> void loadWithConfigurationNode(TreeItem<ConfigurationElement> item, T configurationNode) {
@@ -90,15 +90,21 @@ import static java.util.function.Predicate.not;
         }
     }
 
-    private void saveConfiguration() {
-        try {
-            configurationAccess.saveConfiguration();
-        } catch (Exception thrown) {
-            String message = ExceptionUtils.getRootCauseMessage(thrown);
-            logger.log(Level.SEVERE, message, thrown);
-            Platform.runLater(() -> prepareAlert(() -> new Alert(Alert.AlertType.ERROR, message))
-                .show());
-        }
+    void saveConfiguration(@Observes SaveConfiguration saveConfiguration) {
+        asyncRunner.runAsync(stage, List.of(), () -> {
+            try {
+                configurationAccess.saveConfiguration();
+                configurationTreeView.refresh();
+            } catch (Exception thrown) {
+                String message = ExceptionUtils.getRootCauseMessage(thrown);
+                logger.log(Level.SEVERE, message, thrown);
+                Platform.runLater(() -> Pipeliner.of(prepareAlert(() -> new Alert(Alert.AlertType.ERROR, message)))
+                    .set(alert -> alert::initOwner, topLevelStage())
+                    .set(alert -> alert::initModality, Modality.WINDOW_MODAL)
+                    .get()
+                    .show());
+            }
+        });
     }
 
     @FXML public void contextMenuShowing(WindowEvent event) {
@@ -118,29 +124,14 @@ import static java.util.function.Predicate.not;
             .count());
     }
 
-    private void runWithExecutor(BooleanProperty actionDisableProperty, Runnable action) {
-        executor.execute(() -> {
-            stage.getScene().setCursor(Cursor.WAIT);
-            actionDisableProperty.set(true);
-
-            try {
-                action.run();
-            } finally {
-                actionDisableProperty.set(false);
-                stage.getScene().setCursor(Cursor.DEFAULT);
-            }
-        });
-    }
-
     private void openWindow(String fxmlResource, String parameterName, Object parameter) {
-        fxmlResourceOpenEvent.fire(
+        asyncRunner.runAsync(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> fxmlResourceOpenEvent.fire(
             new FXMLResourceOpen(
-                Pipeliner.of(Stage::new)
-                    .set(connectionStage -> connectionStage::initOwner, stage)
-                    .set(connectionStage -> connectionStage::initModality, Modality.WINDOW_MODAL)
-                    .get(),
+                Builder.of(Stage::new)
+                    .set(stage -> stage::initOwner, this.stage)
+                    .set(stage -> stage::initModality, Modality.WINDOW_MODAL),
                 fxmlResource,
-                Map.of(parameterName, parameter)));
+                Map.of(parameterName, parameter))));
     }
 
     private void openConnectionWindow(Connection connection) {
@@ -152,7 +143,12 @@ import static java.util.function.Predicate.not;
     }
 
     @FXML public void gatherPressed(ActionEvent event) {
-        runWithExecutor(gatherButton.disableProperty(), () -> {
+        List<BooleanProperty> disableProperties = List.of(
+            configurationButton.disableProperty(),
+            gatherButton.disableProperty(),
+            configurationTreeView.disableProperty());
+
+        asyncRunner.runAsync(stage, disableProperties, () -> {
             try {
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {
@@ -188,7 +184,7 @@ import static java.util.function.Predicate.not;
             selectionModel.clearSelection();
             selectionModel.select(connectionItem);
 
-            saveConfiguration();
+            saveConfigurationEvent.fire(new SaveConfiguration());
 
             openGroupWindow(group);
         }
@@ -211,7 +207,7 @@ import static java.util.function.Predicate.not;
             selectionModel.clearSelection();
             selectionModel.select(connectionItem);
 
-            saveConfiguration();
+            saveConfigurationEvent.fire(new SaveConfiguration());
 
             openConnectionWindow(connection);
         }

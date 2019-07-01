@@ -13,7 +13,7 @@
             <padding>
                 <Insets top="2.0" bottom="4.0"/>
             </padding>
-            <MenuButton text="%com.github.windchopper.tools.log.browser.main.configuration">
+            <MenuButton fx:id="configurationButton" text="%com.github.windchopper.tools.log.browser.main.configuration">
                 <items>
                     <MenuItem fx:id="importConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.importConfiguration"/>
                     <MenuItem fx:id="exportConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>

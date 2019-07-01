@@ -31,4 +31,24 @@ abstract class BaseStageController extends StageController {
             .get();
     }
 
+    Stage topLevelStage() {
+        return topLevelStage(stage);
+    }
+
+    private Stage topLevelStage(Stage currentStage) {
+        Stage topLevelStageCandidate = Stage.getWindows().stream()
+            .filter(Stage.class::isInstance)
+            .map(Stage.class::cast)
+            .filter(stage -> stage.getOwner() == currentStage)
+            .findFirst()
+            .orElse(null);
+
+        if (topLevelStageCandidate != null) {
+            return topLevelStage(topLevelStageCandidate);
+        }
+
+        return currentStage;
+    }
+
+
 }

@@ -122,6 +122,7 @@
                 <version>1.6.0</version>
                 <configuration>
                     <mainClass>com.github.windchopper.tools.log.browser.Launcher</mainClass>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
                 </configuration>
             </plugin>
         </plugins>

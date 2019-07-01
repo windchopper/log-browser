@@ -12,23 +12,23 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.file.FileSystem;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
+
+    @Inject private Event<SaveConfiguration> saveConfigurationEvent;
+    @Inject private AsyncRunner asyncRunner;
 
     @FXML private TextField nameField;
     @FXML private ComboBox<ConnectionType> typeBox;
@@ -39,8 +39,6 @@ import java.util.stream.Stream;
     @FXML private Button testButton;
     @FXML private Button saveButton;
     @FXML private Button cancelButton;
-
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private Connection connection;
 
@@ -63,20 +61,6 @@ import java.util.stream.Stream;
             usernameField.setText(connection.getUsername());
             passwordField.setText(connection.getPassword());
         }
-    }
-
-    private void runWithExecutor(Collection<BooleanProperty> actionDisableProperties, Runnable action) {
-        executor.execute(() -> {
-            stage.getScene().setCursor(Cursor.WAIT);
-            actionDisableProperties.forEach(property -> property.set(true));
-
-            try {
-                action.run();
-            } finally {
-                actionDisableProperties.forEach(property -> property.set(false));
-                stage.getScene().setCursor(Cursor.DEFAULT);
-            }
-        });
     }
 
     private void alert(AlertType alertType, String message) {
@@ -117,7 +101,7 @@ import java.util.stream.Stream;
             saveButton.disableProperty(),
             cancelButton.disableProperty());
 
-        runWithExecutor(disableProperties, () -> {
+        asyncRunner.runAsync(stage, disableProperties, () -> {
             try (FileSystem ignored = connectionType.newFileSystem(usernameField.getText(), passwordField.getText(), hostField.getText(), portSpinner.getValue().intValue(), "/")) {
                 Platform.runLater(() -> informationAlert(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.test.succeeded")));
             } catch (Exception thrown) {
@@ -134,6 +118,7 @@ import java.util.stream.Stream;
         connection.setUsername(usernameField.getText());
         connection.setPassword(passwordField.getText());
         stage.close();
+        saveConfigurationEvent.fire(new SaveConfiguration());
     }
 
     @FXML public void cancelSelected(ActionEvent event) {
