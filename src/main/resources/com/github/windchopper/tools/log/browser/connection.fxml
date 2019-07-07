@@ -4,36 +4,59 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<GridPane prefWidth="500.0" minHeight="-Infinity" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
+<GridPane prefWidth="600" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
     <fx:define>
-        <Insets top="4.0" left="4.0" bottom="4.0" right="4.0" fx:id="insets"/>
+        <Insets top="4" left="4" bottom="4" right="4" fx:id="insets"/>
     </fx:define>
     <padding>
         <fx:reference source="insets"/>
     </padding>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.name"/>
-    <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.type"/>
-    <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
-    <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
-    <Spinner fx:id="portSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
-    <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
-    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <HBox GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets">
+    <TitledPane fx:id="parameterPane" text="%com.github.windchopper.tools.log.browser.connection.parameters" collapsible="false" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.hgrow="ALWAYS" GridPane.fillWidth="true" GridPane.margin="$insets">
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="75"/>
+            </columnConstraints>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.name"/>
+            <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.type"/>
+            <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+            <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+            <Spinner fx:id="portSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
+            <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
+            <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+        </GridPane>
+    </TitledPane>
+    <HBox GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" GridPane.fillWidth="true" GridPane.margin="$insets">
         <fx:define>
-            <Insets fx:id="leftButtonInsets"/>
-            <Insets left="4.0" fx:id="rightButtonInsets"/>
+            <Insets right="4" fx:id="leftButtonInsets"/>
+            <Insets left="4" fx:id="rightButtonInsets"/>
         </fx:define>
         <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#testSelected"/>
+            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#testPressed"/>
+            <ToggleButton fx:id="browseButton" text="%com.github.windchopper.tools.log.browser.connection.browse" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#browsePressed"/>
         </HBox>
         <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#saveSelected"/>
-            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" cancelButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#cancelSelected"/>
+            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#savePressed"/>
+            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#cancelPressed"/>
         </HBox>
     </HBox>
+    <TitledPane fx:id="browsePane" text="%com.github.windchopper.tools.log.browser.connection.fileSystem" collapsible="false" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" GridPane.fillWidth="true" GridPane.fillHeight="true" GridPane.margin="$insets">
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+            </columnConstraints>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.path"/>
+            <TextField fx:id="pathField" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+            <TreeView fx:id="directoryTreeView" showRoot="false" prefWidth="0" prefHeight="250" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" GridPane.fillWidth="true" GridPane.fillHeight="true" GridPane.margin="$insets"/>
+            <ListView fx:id="fileListView" prefWidth="0" prefHeight="250" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" GridPane.fillWidth="true" GridPane.fillHeight="true" GridPane.margin="$insets"/>
+        </GridPane>
+    </TitledPane>
 </GridPane>

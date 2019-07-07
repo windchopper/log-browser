@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
+import java.util.Properties;
 
 public enum ConnectionType {
 
@@ -23,6 +25,7 @@ public enum ConnectionType {
         (username, password, host, port) -> Map.of("defaultSessionFactory", Pipeliner.of(DefaultSessionFactory::new)
             .set(factory -> factory::setUsername, username)
             .set(factory -> factory::setPassword, password)
+            .accept(factory -> factory.setConfig("StrictHostKeyChecking", "no"))
             .get()),
         UnixSshFileSystemProvider.SCHEME_SSH_UNIX,
         22,
@@ -34,6 +37,7 @@ public enum ConnectionType {
         (username, password, host, port) -> Map.of("defaultSessionFactory", Pipeliner.of(DefaultSessionFactory::new)
             .set(factory -> factory::setUsername, username)
             .set(factory -> factory::setPassword, password)
+            .accept(factory -> factory.setConfig("StrictHostKeyChecking", "no"))
             .get()),
         UnixSshSftpHybridFileSystemProvider.SCHEME_SSH_SFTP_HYBRID_UNIX,
         22,
@@ -42,7 +46,12 @@ public enum ConnectionType {
         Globals.bundle.getString("com.github.windchopper.tools.log.browser.secureShellWithSecureFileTransferFallback.description")),
     SECURE_FILE_TRANSFER(
         SFTPFileSystemProvider.class,
-        (username, password, host, port) -> Map.of("username", username, "password", password.toCharArray()),
+        (username, password, host, port) -> Map.of(
+            "username", username,
+            "password", password.toCharArray(),
+            "config", Pipeliner.of(Properties::new)
+                .accept(properties -> properties.setProperty("StrictHostKeyChecking", "no"))
+                .get()),
         "sftp",
         22,
         null,
@@ -114,15 +123,19 @@ public enum ConnectionType {
         return String.format("%s (%s)", description, title);
     }
 
-    public FileSystem newFileSystem(String username, String password, String host, int port, String path) throws IOException {
+    public FileSystem fileSystem(String username, String password, String host, int port) throws IOException {
         try {
             if (provider == null) {
                 provider = providerType.getConstructor().newInstance();
             }
 
-            return provider.newFileSystem(
-                new URI(scheme, null, host, port, defaultPath, null, null),
-                environmentBuilder.buildEnvironment(username, password, host, port));
+            URI uri = new URI(scheme, null, host, port, defaultPath, null, null);
+
+            try {
+                return provider.getFileSystem(uri);
+            } catch (FileSystemNotFoundException thrown) {
+                return provider.newFileSystem(uri, environmentBuilder.buildEnvironment(username, password, host, port));
+            }
         } catch (ReflectiveOperationException | URISyntaxException thrown) {
             throw new IOException(thrown);
         }

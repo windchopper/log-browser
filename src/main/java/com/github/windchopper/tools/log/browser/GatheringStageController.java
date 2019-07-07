@@ -5,17 +5,12 @@ import javafx.stage.Stage;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
-import java.net.URI;
 import java.util.Map;
 
-@ApplicationScoped @FXMLResource(Globals.FXML__BROWSER) @Named("BrowserStageController") public class BrowserStageController extends BaseStageController {
-
-    private URI uri;
+@ApplicationScoped @FXMLResource(Globals.FXML__GATHERING) @Named("GatheringStageController") public class GatheringStageController extends BaseStageController {
 
     @Override protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
         super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
-
-        uri = (URI) parameters.get("uri");
     }
 
 }

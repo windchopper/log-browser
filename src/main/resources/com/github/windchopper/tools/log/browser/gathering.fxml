@@ -29,11 +29,11 @@
             <Insets left="4.0" fx:id="rightButtonInsets"/>
         </fx:define>
         <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#testSelected"/>
+            <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" HBox.margin="$leftButtonInsets" onAction="#testPressed"/>
         </HBox>
         <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#saveSelected"/>
-            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" cancelButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#cancelSelected"/>
+            <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" defaultButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#savePressed"/>
+            <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" cancelButton="true" minWidth="100.0" HBox.margin="$rightButtonInsets" onAction="#cancelPressed"/>
         </HBox>
     </HBox>
 </GridPane>
