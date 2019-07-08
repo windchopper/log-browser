@@ -8,6 +8,8 @@ import com.github.windchopper.common.fx.spinner.NumberType;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
+import com.github.windchopper.tools.log.browser.fs.RemoteFile;
+import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
@@ -17,6 +19,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.annotation.PreDestroy;
@@ -25,15 +28,10 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
-
-import static java.util.stream.Collectors.toList;
 
 @ApplicationScoped @FXMLResource(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
 
@@ -56,10 +54,10 @@ import static java.util.stream.Collectors.toList;
     @FXML private Button cancelButton;
 
     @FXML private TextField pathField;
-    @FXML private TreeView<Path> directoryTreeView;
-    @FXML private ListView<Path> fileListView;
+    @FXML private TreeView<RemoteFile> directoryTreeView;
+    @FXML private ListView<RemoteFile> fileListView;
 
-    private FileSystem fileSystem;
+    private RemoteFileSystem fileSystem;
 
     private List<BooleanProperty> allComponentDisableProperties;
     private Connection connection;
@@ -80,51 +78,49 @@ import static java.util.stream.Collectors.toList;
 
         typeBox.getItems().addAll(ConnectionType.values());
         typeBox.setConverter(new DelegatingStringConverter<>(ConnectionType::displayName));
-        typeBox.setCellFactory(CellFactories.listCellFactory((cell, item) -> cell.setText(item.displayName())));
+        typeBox.setCellFactory(CellFactories.listCellFactory((cell, item, empty) -> cell.setText(empty || item == null ? null : item.displayName())));
 
         portSpinner.setValueFactory(new FlexibleSpinnerValueFactory<>(NumberType.INTEGER, 0, 65535, 0));
 
         directoryTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        directoryTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item) -> cell.setText(Optional.ofNullable(item.getFileName())
-            .orElse(item).toString())));
+        directoryTreeView.setCellFactory(CellFactories.treeCellFactory(RemoteFile::updateCell));
         directoryTreeView.getSelectionModel().selectedItemProperty().addListener((observable, unselectedItem, selectedItem) -> {
-            if (fileSystem != null) {
-                if (selectedItem != null) {
-                    Path selectedPath = selectedItem.getValue();
-                    pathField.setText(selectedPath.toAbsolutePath().toString());
-
-                    asyncRunner.runAsync(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
-                        List<Path> filePaths;
-
-                        try {
-                            filePaths = Files.list(selectedPath)
-                                .collect(toList());
-
-                            Platform.runLater(() -> {
-                                fileListView.getItems().clear();
-
-                                selectedItem.getChildren().clear();
-                                selectedItem.setExpanded(true);
-
-                                for (Path path : filePaths) {
-                                    if (Files.isDirectory(path)) {
-                                        selectedItem.getChildren().add(new TreeItem<>(path));
-                                    } else {
-                                        fileListView.getItems().add(path);
-                                    }
-                                }
-                            });
-                        } catch (IOException thrown) {
-                            Platform.runLater(() -> errorAlert(String.format(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.failed"), thrown.getLocalizedMessage())));
-                        }
-                    });
-                }
+            if (fileSystem == null || selectedItem == null) {
+                return;
             }
+
+            RemoteFile selectedFile = selectedItem.getValue();
+            pathField.setText(selectedFile.path());
+
+            selectedItem.getChildren().clear();
+            fileListView.getItems().clear();
+
+            asyncRunner.runAsync(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
+                List<TreeItem<RemoteFile>> directoryItems = new ArrayList<>();
+                List<RemoteFile> files = new ArrayList<>();
+
+                try {
+                    fileSystem.children(selectedFile).stream()
+                        .sorted()
+                        .peek(files::add)
+                        .filter(RemoteFile::directory)
+                        .filter(file -> !file.path().endsWith(".."))
+                        .map(TreeItem::new)
+                        .forEach(directoryItems::add);
+                } catch (IOException thrown) {
+                    Platform.runLater(() -> errorAlert(String.format(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.failed"), thrown.getLocalizedMessage())));
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    selectedItem.getChildren().addAll(directoryItems);
+                    fileListView.getItems().addAll(files);
+                });
+            });
         });
 
         fileListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        fileListView.setCellFactory(CellFactories.listCellFactory((cell, item) -> cell.setText(Optional.ofNullable(item.getFileName())
-            .orElse(item).toString())));
+        fileListView.setCellFactory(CellFactories.listCellFactory(RemoteFile::updateCell));
 
         allComponentDisableProperties = List.of(
             nameField.disableProperty(),
@@ -153,6 +149,14 @@ import static java.util.stream.Collectors.toList;
         stage.sizeToScene();
     }
 
+    private void runWithFxThread(Runnable action) {
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+        } else {
+            Platform.runLater(action);
+        }
+    }
+
     private void alert(AlertType alertType, String message) {
         prepareAlert(Pipeliner.of(() -> new Alert(alertType, message, ButtonType.OK))
             .set(alert -> alert::initOwner, stage)
@@ -168,18 +172,18 @@ import static java.util.stream.Collectors.toList;
         alert(AlertType.ERROR, message);
     }
 
-    private FileSystem fileSystem() throws IOException {
+    private RemoteFileSystem newFileSystem() throws IOException {
         ConnectionType connectionType = typeBox.getValue();
 
         if (connectionType == null) {
             throw new IllegalStateException(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.typeNotSelected"));
         }
 
-        return connectionType.fileSystem(
-            usernameField.getText(),
-            passwordField.getText(),
+        return connectionType.newFileSystem(
             hostField.getText(),
-            portSpinner.getValue().intValue());
+            portSpinner.getValue().intValue(),
+            usernameField.getText(),
+            passwordField.getText());
     }
 
     @FXML public void typeSelected(ActionEvent event) {
@@ -188,7 +192,7 @@ import static java.util.stream.Collectors.toList;
 
     @FXML public void testPressed(ActionEvent event) {
         asyncRunner.runAsync(stage, allComponentDisableProperties, () -> {
-            try (FileSystem ignored = fileSystem()) {
+            try (RemoteFileSystem ignored = newFileSystem()) {
                 Platform.runLater(() -> informationAlert(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.succeeded")));
             } catch (Exception thrown) {
                 Platform.runLater(() -> errorAlert(String.format(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.failed"), thrown.getLocalizedMessage())));
@@ -208,12 +212,8 @@ import static java.util.stream.Collectors.toList;
 
         asyncRunner.runAsync(stage, allComponentDisableProperties, () -> {
             try {
-                fileSystem = fileSystem();
-                TreeItem<Path> rootItem = new TreeItem<>();
-
-                for (Path rootPath : fileSystem.getRootDirectories()) {
-                    rootItem.getChildren().add(new TreeItem<>(rootPath));
-                }
+                fileSystem = newFileSystem();
+                var rootItem = new TreeItem<>(fileSystem.root());
 
                 Platform.runLater(() -> {
                     directoryTreeView.setRoot(rootItem);

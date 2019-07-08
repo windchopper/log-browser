@@ -24,16 +24,7 @@ module windchopper.tools.log.browser {
 
     requires windchopper.common;
     requires org.apache.commons.lang3;
+    requires org.apache.commons.collections4;
     requires jsch;
-    requires jsch.nio;
-    requires jsch.extension;
-    requires sftp.fs;
-    requires ftp.fs;
-
-    uses com.pastdev.jsch.nio.file.UnixSshFileSystemProvider;
-    uses com.pastdev.jsch.nio.file.UnixSshSftpHybridFileSystemProvider;
-    uses com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider;
-    uses com.github.robtimus.filesystems.ftp.FTPFileSystemProvider;
-    uses com.github.robtimus.filesystems.ftp.FTPSFileSystemProvider;
 
 }

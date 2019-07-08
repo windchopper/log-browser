@@ -64,7 +64,7 @@ import static java.util.function.Predicate.not;
         loadWithConfigurationNode(configurationTreeRoot, configurationAccess.getConfiguration());
 
         configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item) -> cell.setText(item.getName())));
+        configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item, empty) -> cell.setText(empty || item == null ? null : item.getName())));
         configurationTreeView.setOnEditCommit(editEvent -> saveConfigurationEvent.fire(new SaveConfiguration()));
     }
 

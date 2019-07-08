@@ -23,7 +23,7 @@ import java.util.Base64;
     private static final int SALT_SIZE = 8;
     private static final int ITERATION_COUNT = 1000;
 
-    private final PreferencesEntry<byte[]> saltEntry = new PreferencesEntry<>(Globals.preferencesStorage, "salt", new ByteArrayType(), ChronoUnit.FOREVER.getDuration());
+    private final PreferencesEntry<byte[]> saltEntry = new PreferencesEntry<>(Globals.preferencesStorage, "salt", new ByteArrayType());
 
     private Cipher cipher;
     private PBEParameterSpec parameters;
@@ -32,7 +32,7 @@ import java.util.Base64;
     @PostConstruct
     void afterConstruction() {
         try {
-            byte[] salt = saltEntry.get();
+            byte[] salt = saltEntry.load();
 
             if (salt == null) {
                 new SecureRandom().nextBytes(salt = new byte[SALT_SIZE]);

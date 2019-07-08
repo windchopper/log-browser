@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 @ApplicationScoped @Named("AsyncRunner") public class AsyncRunner {
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @PreDestroy void destroying() {
         executor.shutdown();

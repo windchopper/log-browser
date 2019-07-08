@@ -1,11 +1,8 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.preferences.PlatformPreferencesStorage;
-import com.github.windchopper.common.preferences.PreferencesEntry;
 import com.github.windchopper.common.preferences.PreferencesStorage;
-import com.github.windchopper.common.preferences.types.FlatType;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
@@ -20,8 +17,5 @@ public interface Globals {
 
     PreferencesStorage preferencesStorage = new PlatformPreferencesStorage(Preferences.userRoot()
         .node("com/github/windchopper/tools/log/browser"));
-
-    PreferencesEntry<Integer> fileSystemMaxThreadCount = new PreferencesEntry<>(preferencesStorage, "fileSystemMaxThreadCount",
-        new FlatType<>(Integer::decode, Object::toString), ChronoUnit.FOREVER.getDuration());
 
 }
