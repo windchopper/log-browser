@@ -1,9 +1,7 @@
 package com.github.windchopper.tools.log.browser.configuration;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 @XmlType(name = "connection") @XmlAccessorType(XmlAccessType.FIELD) public class Connection extends ConfigurationElement {
 
@@ -12,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
     @XmlElement(name = "port") private int port;
     @XmlElement(name = "username") private String username;
     @XmlElement(name = "password") private String password;
+    @XmlElementWrapper(name = "paths") @XmlElement(name = "path") private List<String> pathList;
 
     public ConnectionType getType() {
         return type;
@@ -51,6 +50,14 @@ import javax.xml.bind.annotation.XmlType;
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<String> getPathList() {
+        return pathList;
+    }
+
+    public void setPathList(List<String> pathList) {
+        this.pathList = pathList;
     }
 
 }

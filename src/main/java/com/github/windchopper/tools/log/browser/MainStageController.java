@@ -9,7 +9,7 @@ import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.Group;
-import javafx.application.Platform;
+import com.github.windchopper.tools.log.browser.events.SaveConfiguration;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,18 +19,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 
 import static java.util.function.Predicate.not;
 
@@ -95,14 +95,8 @@ import static java.util.function.Predicate.not;
             try {
                 configurationAccess.saveConfiguration();
                 configurationTreeView.refresh();
-            } catch (Exception thrown) {
-                String message = ExceptionUtils.getRootCauseMessage(thrown);
-                logger.log(Level.SEVERE, message, thrown);
-                Platform.runLater(() -> Pipeliner.of(prepareAlert(() -> new Alert(Alert.AlertType.ERROR, message)))
-                    .set(alert -> alert::initOwner, topLevelStage())
-                    .set(alert -> alert::initModality, Modality.WINDOW_MODAL)
-                    .get()
-                    .show());
+            } catch (IOException | JAXBException thrown) {
+                errorLogAndAlert(thrown);
             }
         });
     }

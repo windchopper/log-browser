@@ -4,54 +4,38 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<GridPane prefWidth="800" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
+<GridPane prefWidth="600" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.ConnectionStageController">
     <fx:define>
         <Insets top="4" left="4" bottom="4" right="4" fx:id="insets"/>
     </fx:define>
     <padding>
         <fx:reference source="insets"/>
     </padding>
-    <TitledPane fx:id="parameterPane" text="%com.github.windchopper.tools.log.browser.connection.parameters" collapsible="false" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.hgrow="ALWAYS" GridPane.fillWidth="true" GridPane.margin="$insets">
-        <GridPane>
-            <columnConstraints>
-                <ColumnConstraints percentWidth="20"/>
-                <ColumnConstraints percentWidth="80"/>
-            </columnConstraints>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.name"/>
-            <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.type"/>
-            <ComboBox fx:id="typeBox" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
-            <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
-            <Spinner fx:id="portSpinner" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
-            <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
-            <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-        </GridPane>
-    </TitledPane>
-    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets">
+    <columnConstraints>
+        <ColumnConstraints percentWidth="15"/>
+        <ColumnConstraints percentWidth="35"/>
+        <ColumnConstraints percentWidth="15"/>
+        <ColumnConstraints percentWidth="35"/>
+    </columnConstraints>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.name"/>
+    <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.type"/>
+    <ComboBox fx:id="typeBox" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+    <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+    <Spinner fx:id="portSpinner" GridPane.columnIndex="3" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
+    <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
+    <PasswordField fx:id="passwordField" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+    <Label GridPane.halignment="RIGHT" GridPane.valignment="BASELINE" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.pathList"/>
+    <TextArea fx:id="pathListArea" prefRowCount="4" GridPane.columnSpan="3" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets"/>
+    <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets">
         <fx:define>
-            <Insets bottom="4" fx:id="buttonInsets"/>
+            <Insets left="4" fx:id="buttonInsets"/>
         </fx:define>
-        <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" minWidth="100.0" VBox.margin="$buttonInsets" onAction="#savePressed"/>
-        <Button fx:id="cancelButton" text="%com.github.windchopper.tools.log.browser.connection.cancel" minWidth="100.0" VBox.margin="$buttonInsets" onAction="#cancelPressed"/>
-        <Button fx:id="testButton" text="%com.github.windchopper.tools.log.browser.connection.test" minWidth="100.0" VBox.margin="$buttonInsets" onAction="#testPressed"/>
-        <ToggleButton fx:id="browseButton" text="%com.github.windchopper.tools.log.browser.connection.browse" minWidth="100.0" VBox.margin="$buttonInsets" onAction="#browsePressed"/>
-    </VBox>
-    <TitledPane fx:id="browsePane" text="%com.github.windchopper.tools.log.browser.connection.fileSystem" collapsible="false" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" GridPane.fillWidth="true" GridPane.fillHeight="true" GridPane.margin="$insets">
-        <GridPane>
-            <columnConstraints>
-                <ColumnConstraints percentWidth="20"/>
-                <ColumnConstraints percentWidth="20"/>
-                <ColumnConstraints percentWidth="30"/>
-                <ColumnConstraints percentWidth="30"/>
-            </columnConstraints>
-            <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.path"/>
-            <TextField fx:id="pathField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.columnSpan="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-            <TreeView fx:id="directoryTreeView" prefWidth="0" prefHeight="250" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets"/>
-            <ListView fx:id="fileListView" prefWidth="0" prefHeight="250" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.columnSpan="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets"/>
-        </GridPane>
-    </TitledPane>
+        <Button fx:id="saveButton" text="%com.github.windchopper.tools.log.browser.connection.save" minWidth="100.0" HBox.margin="$buttonInsets" onAction="#savePressed"/>
+        <Button fx:id="choosePathListButton" text="%com.github.windchopper.tools.log.browser.connection.choosePathList" minWidth="100.0" HBox.margin="$buttonInsets" onAction="#choosePathListButton"/>
+    </HBox>
 </GridPane>

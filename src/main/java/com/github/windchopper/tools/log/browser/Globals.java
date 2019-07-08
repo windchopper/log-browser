@@ -10,6 +10,7 @@ public interface Globals {
 
     String FXML__MAIN = "com/github/windchopper/tools/log/browser/main.fxml";
     String FXML__CONNECTION = "com/github/windchopper/tools/log/browser/connection.fxml";
+    String FXML__BROWSE = "com/github/windchopper/tools/log/browser/browse.fxml";
     String FXML__GROUP = "com/github/windchopper/tools/log/browser/group.fxml";
     String FXML__GATHERING = "com/github/windchopper/tools/log/browser/gathering.fxml";
 
