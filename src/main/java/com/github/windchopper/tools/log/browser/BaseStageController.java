@@ -37,11 +37,10 @@ abstract class BaseStageController extends StageController {
     }
 
     private void alert(Alert.AlertType alertType, String message) {
-        Alert alert = prepareAlert(Pipeliner.of(() -> new Alert(alertType, message, ButtonType.OK))
+        runWithFxThread(() -> prepareAlert(Pipeliner.of(() -> new Alert(alertType, message, ButtonType.OK))
             .set(bean -> bean::initOwner, topLevelStage(stage))
-            .set(bean -> bean::initModality, Modality.WINDOW_MODAL));
-
-        runWithFxThread(alert::show);
+            .set(bean -> bean::initModality, Modality.WINDOW_MODAL))
+            .show());
     }
 
     void informationAlert(String message) {

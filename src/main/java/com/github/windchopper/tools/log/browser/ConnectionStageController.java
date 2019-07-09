@@ -9,7 +9,7 @@ import com.github.windchopper.common.fx.spinner.NumberType;
 import com.github.windchopper.common.util.Builder;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
-import com.github.windchopper.tools.log.browser.events.ConfirmPathList;
+import com.github.windchopper.tools.log.browser.events.ConfirmPaths;
 import com.github.windchopper.tools.log.browser.events.SaveConfiguration;
 import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
 import javafx.event.ActionEvent;
@@ -87,8 +87,8 @@ import java.util.Optional;
             passwordField.getText());
     }
 
-    void pathListConfirmed(@Observes ConfirmPathList confirmPathList) {
-        pathListArea.setText(String.join("; ", confirmPathList.paths()));
+    void pathListConfirmed(@Observes ConfirmPaths confirmPaths) {
+        pathListArea.setText(String.join("; ", confirmPaths.paths()));
     }
 
     @FXML public void typeSelected(ActionEvent event) {
