@@ -1,5 +1,6 @@
 package com.github.windchopper.tools.log.browser.fx;
 
+import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.fs.RemoteFile;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.CheckBox;
@@ -26,8 +27,10 @@ public class FileTreeCell extends TreeCell<RemoteFile> {
 
         getStyleClass().add("check-box-tree-cell");
 
-        checkBox = new CheckBox();
-        checkBox.setAllowIndeterminate(true);
+        checkBox = Pipeliner.of(CheckBox::new)
+            .set(bean -> bean::setFocusTraversable, false)
+            .set(bean -> bean::setAllowIndeterminate, false)
+            .get();
 
         setGraphic(null);
     }

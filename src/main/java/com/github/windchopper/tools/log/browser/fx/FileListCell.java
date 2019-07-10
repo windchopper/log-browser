@@ -1,5 +1,6 @@
 package com.github.windchopper.tools.log.browser.fx;
 
+import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.fs.RemoteFile;
 import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Pos;
@@ -27,7 +28,10 @@ public class FileListCell extends ListCell<RemoteFile> {
 
         getStyleClass().add("check-box-list-cell");
 
-        checkBox = new CheckBox();
+        checkBox = Pipeliner.of(CheckBox::new)
+            .set(bean -> bean::setFocusTraversable, false)
+            .set(bean -> bean::setAllowIndeterminate, false)
+            .get();
 
         setAlignment(Pos.CENTER_LEFT);
         setContentDisplay(ContentDisplay.LEFT);

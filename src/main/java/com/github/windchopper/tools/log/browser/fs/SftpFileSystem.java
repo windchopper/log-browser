@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -116,10 +117,8 @@ public class SftpFileSystem extends RemoteFileSystem implements AutoCloseable {
         return new SftpFile("/", true);
     }
 
-    @Override @SuppressWarnings("unchecked") public List<RemoteFile> children(RemoteFile file) throws IOException {
+    @Override @SuppressWarnings("unchecked") public List<RemoteFile> children(String path) throws IOException {
         try {
-            String path = file.path();
-
             var instant = Instant.now();
             var savedInstant = childListInstantMap.computeIfAbsent(path, missingPath -> Instant.MIN);
 
@@ -132,8 +131,14 @@ public class SftpFileSystem extends RemoteFileSystem implements AutoCloseable {
 
             try {
                 List<ChannelSftp.LsEntry> entries = channel.ls(path);
+                Predicate<ChannelSftp.LsEntry> filter = entry -> !StringUtils.equals(entry.getFilename(), ".");
+
+                if (StringUtils.equals(path, "/")) {
+                    filter = filter.and(entry -> !StringUtils.equals(entry.getFilename(), ".."));
+                }
+
                 var children = entries.stream()
-                    .filter(entry -> !StringUtils.equalsAny(entry.getFilename(), "."))
+                    .filter(filter)
                     .filter(entry -> !entry.getAttrs().isLink())
                     .map(entry -> new SftpFile((path + "/" + entry.getFilename()).replaceAll("/+", "/"), entry.getAttrs().isDir()))
                     .collect(toList());
