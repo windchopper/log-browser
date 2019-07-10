@@ -1,6 +1,12 @@
 package com.github.windchopper.tools.log.browser.fs;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TreeView;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 public abstract class RemoteFile implements Comparable<RemoteFile> {
 
@@ -44,6 +50,17 @@ public abstract class RemoteFile implements Comparable<RemoteFile> {
         }
 
         return displayName;
+    }
+
+    public BooleanProperty createSelectedProperty(Map<String, BooleanProperty> selectedStateBuffer, TreeView<?> treeView, ListView<?> listView) {
+        BooleanProperty selectedProperty = selectedStateBuffer.computeIfAbsent(path(), missingPath -> new SimpleBooleanProperty(this, "selected"));
+
+        selectedProperty.addListener((observable, oldValue, newValue) -> {
+            treeView.refresh();
+            listView.refresh();
+        });
+
+        return selectedProperty;
     }
 
 }
