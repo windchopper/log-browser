@@ -80,5 +80,4 @@ abstract class BaseStageController extends StageController {
         return currentStage;
     }
 
-
 }

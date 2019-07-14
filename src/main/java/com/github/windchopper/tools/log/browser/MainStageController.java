@@ -27,10 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.function.Predicate.not;
 
@@ -215,6 +212,43 @@ import static java.util.function.Predicate.not;
         } else if (selectedItem.getValue() instanceof Group) {
             openGroupWindow((Group) selectedItem.getValue());
         }
+    }
+
+    @FXML public void removeSelected(ActionEvent event) {
+        List<TreeItem<ConfigurationElement>> selectedItems = new ArrayList<>(configurationTreeView.getSelectionModel().getSelectedItems());
+        configurationTreeView.getSelectionModel().clearSelection();
+
+        while (selectedItems.size() > 0) {
+            List<TreeItem<ConfigurationElement>> copyOfSelectedItems = new ArrayList<>(selectedItems);
+
+            if (!selectedItems.removeIf(item -> item.getParent() == null || copyOfSelectedItems.contains(item.getParent()))) {
+                break;
+            }
+        }
+
+        for (TreeItem<ConfigurationElement> item : selectedItems) {
+            TreeItem<ConfigurationElement> parentItem = item.getParent();
+            Group parentGroup = (Group) parentItem.getValue();
+
+            ConfigurationElement configurationElement = item.getValue();
+            parentItem.getChildren().remove(item);
+
+            if (configurationElement instanceof Connection) {
+                parentGroup.getConnections().remove(configurationElement);
+            } else if (configurationElement instanceof Group) {
+                parentGroup.getGroups().remove(configurationElement);
+            }
+        }
+
+        saveConfigurationEvent.fire(new SaveConfiguration());
+    }
+
+    @FXML public void groupSelected(ActionEvent event) {
+
+    }
+
+    @FXML public void ungroupSelected(ActionEvent event) {
+
     }
 
 }

@@ -38,10 +38,10 @@
                                 <SeparatorMenuItem/>
                                 <MenuItem fx:id="addConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addConnection" onAction="#addConnectionSelected"/>
                             </Menu>
-                            <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove"/>
+                            <MenuItem fx:id="removeMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.remove" onAction="#removeSelected"/>
                             <SeparatorMenuItem/>
-                            <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group"/>
-                            <MenuItem fx:id="ungroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.ungroup"/>
+                            <MenuItem fx:id="groupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.group" onAction="#groupSelected"/>
+                            <MenuItem fx:id="ungroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.ungroup" onAction="#ungroupSelected"/>
                             <SeparatorMenuItem/>
                             <MenuItem fx:id="propertiesMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.properties" onAction="#propertiesSelected"/>
                         </items>
