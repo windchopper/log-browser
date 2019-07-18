@@ -2,7 +2,7 @@ package com.github.windchopper.tools.log.browser.fs;
 
 import com.github.windchopper.common.preferences.PreferencesEntry;
 import com.github.windchopper.common.preferences.types.FlatType;
-import com.github.windchopper.common.util.KnownSystemProperties;
+import com.github.windchopper.common.util.SystemProperty;
 import com.github.windchopper.tools.log.browser.Globals;
 import com.jcraft.jsch.*;
 import org.apache.commons.collections4.map.LRUMap;
@@ -12,6 +12,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -88,7 +89,7 @@ public class SftpFileSystem extends RemoteFileSystem implements AutoCloseable {
     }
 
     private Optional<Path> defaultSecureShellConfigurationDirectory() {
-        return KnownSystemProperties.userHomePath.get()
+        return SystemProperty.USER_HOME.read(Paths::get)
             .map(path -> path.resolve(".ssh"));
     }
 

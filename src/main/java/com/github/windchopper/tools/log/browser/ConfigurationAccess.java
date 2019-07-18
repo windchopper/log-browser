@@ -1,6 +1,7 @@
 package com.github.windchopper.tools.log.browser;
 
-import com.github.windchopper.common.util.KnownSystemProperties;
+import com.github.windchopper.common.util.Pipeliner;
+import com.github.windchopper.common.util.SystemProperty;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -36,15 +37,17 @@ import java.util.logging.Logger;
 
     @PostConstruct private void afterConstruction() {
         try {
-            configurationFile = KnownSystemProperties.userHomePath.get()
+            configurationFile = SystemProperty.USER_HOME.read(Paths::get)
                 .orElseGet(() -> Paths.get(""))
                 .resolve(".log-browser/configuration.xml");
 
             try {
                 JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
 
-                marshaller = jaxbContext.createMarshaller();
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                marshaller = Pipeliner.of(jaxbContext)
+                    .mapFailable(JAXBContext::createMarshaller)
+                    .acceptFailable(marshaller -> marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true))
+                    .get();
 
                 try (Reader reader = Files.newBufferedReader(configurationFile)) {
                     configuration = (Configuration) jaxbContext
