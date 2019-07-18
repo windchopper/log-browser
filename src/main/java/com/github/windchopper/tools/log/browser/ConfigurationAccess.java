@@ -3,6 +3,7 @@ package com.github.windchopper.tools.log.browser;
 import com.github.windchopper.common.util.KnownSystemProperties;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -17,8 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationScoped @Named("ConfigurationAccess") public class ConfigurationAccess {
+
+    private static final Logger logger = Logger.getLogger(ConfigurationAccess.class.getName());
 
     private Marshaller marshaller;
 
@@ -31,19 +36,24 @@ import java.nio.file.StandardCopyOption;
 
     @PostConstruct private void afterConstruction() {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
-
-            marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
             configurationFile = KnownSystemProperties.userHomePath.get()
                 .orElseGet(() -> Paths.get(""))
                 .resolve(".log-browser/configuration.xml");
 
-            try (Reader reader = Files.newBufferedReader(configurationFile)) {
-                configuration = (Configuration) jaxbContext
-                    .createUnmarshaller()
-                    .unmarshal(reader);
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
+
+                marshaller = jaxbContext.createMarshaller();
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+                try (Reader reader = Files.newBufferedReader(configurationFile)) {
+                    configuration = (Configuration) jaxbContext
+                        .createUnmarshaller()
+                        .unmarshal(reader);
+                }
+            } catch (IOException thrown) {
+                logger.log(Level.WARNING, ExceptionUtils.getRootCauseMessage(thrown), thrown);
+                configuration = new Configuration();
             }
 
             if (StringUtils.isBlank(configuration.getName())) {
