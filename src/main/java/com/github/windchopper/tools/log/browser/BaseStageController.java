@@ -2,7 +2,6 @@ package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.form.StageFormController;
 import com.github.windchopper.common.util.Pipeliner;
-import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -15,7 +14,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-abstract class BaseStageController extends StageFormController {
+abstract class BaseStageController extends StageFormController implements FormControllerRoutines {
 
     private static final Image iconImage = new Image("/com/github/windchopper/tools/log/browser/images/scroll-48.png");
 
@@ -49,14 +48,6 @@ abstract class BaseStageController extends StageFormController {
         String errorMessage = ExceptionUtils.getRootCauseMessage(exception);
         logger.log(Level.SEVERE, errorMessage, exception);
         errorAlert(errorMessage);
-    }
-
-    private void runWithFxThread(Runnable action) {
-        if (Platform.isFxApplicationThread()) {
-            action.run();
-        } else {
-            Platform.runLater(action);
-        }
     }
 
     private Stage topLevelStage(Stage currentStage) {

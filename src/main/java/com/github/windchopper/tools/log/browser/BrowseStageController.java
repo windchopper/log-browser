@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.toList;
             selectedItem.getChildren().clear();
             fileListView.getItems().clear();
 
-            asyncRunner.runAsync(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
+            asyncRunner.runAsyncWithBusyPointer(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
                 List<TreeItem<RemoteFile>> directoryItems = new ArrayList<>();
                 List<RemoteFile> files = new ArrayList<>();
 
@@ -112,7 +112,7 @@ import static java.util.stream.Collectors.toList;
                     treeItem.getChildren().clear();
                 }
 
-                asyncRunner.runAsync(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
+                asyncRunner.runAsyncWithBusyPointer(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
                     List<TreeItem<RemoteFile>> directoryItems = new ArrayList<>();
                     List<RemoteFile> files = new ArrayList<>();
 

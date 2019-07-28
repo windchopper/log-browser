@@ -89,7 +89,7 @@ import static java.util.function.Predicate.not;
     }
 
     void saveConfiguration(@Observes ConfigurationSave saveConfiguration) {
-        asyncRunner.runAsync(stage, List.of(), () -> {
+        asyncRunner.runAsyncWithBusyPointer(stage, List.of(), () -> {
             try {
                 configurationAccess.saveConfiguration();
                 configurationTreeView.refresh();
@@ -117,7 +117,7 @@ import static java.util.function.Predicate.not;
     }
 
     private void openWindow(String fxmlResource, String parameterName, Object parameter) {
-        asyncRunner.runAsync(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> formLoadEvent.fire(
+        asyncRunner.runAsyncWithBusyPointer(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> formLoadEvent.fire(
             new StageFormLoad(
                 Builder.of(Stage::new)
                     .set(stage -> stage::initOwner, this.stage)
@@ -137,8 +137,9 @@ import static java.util.function.Predicate.not;
     @FXML public void downloadSelected(ActionEvent event) {
         formLoadEvent.fire(new TabFormLoad(
             Pipeliner.of(Tab::new)
-                .set(tab -> tab::setText, String.format("%1$tR %1$tT", LocalDateTime.now()))
+                .set(tab -> tab::setText, String.format("%1$tF %1$tT", LocalDateTime.now()))
                 .accept(tab -> workareaPane.getTabs().add(tab))
+                .accept(tab -> workareaPane.getSelectionModel().select(tab))
                 .get(),
             Globals.FXML__DOWNLOAD,
             Map.of("selection", List.copyOf(configurationTreeView.getSelectionModel().getSelectedItems()))));

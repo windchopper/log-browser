@@ -114,7 +114,7 @@ import java.util.Optional;
     }
 
     @FXML public void choosePathListButton(ActionEvent event) {
-        asyncRunner.runAsync(stage, List.of(choosePathListButton.disableProperty()), () -> {
+        asyncRunner.runAsyncWithBusyPointer(stage, List.of(choosePathListButton.disableProperty()), () -> {
             try {
                 RemoteFileSystem fileSystem = newFileSystem();
                 fxmlResourceOpenEvent.fire(

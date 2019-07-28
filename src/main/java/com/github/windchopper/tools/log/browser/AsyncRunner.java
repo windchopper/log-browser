@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
         executor.shutdown();
     }
 
-    void runAsync(Stage stage, Collection<BooleanProperty> actionDisableProperties, Runnable action) {
+    void runAsyncWithBusyPointer(Stage stage, Collection<BooleanProperty> actionDisableProperties, Runnable action) {
         executor.execute(() -> {
             stage.getScene().setCursor(Cursor.WAIT);
             actionDisableProperties.forEach(property -> property.set(true));
@@ -29,6 +29,18 @@ import java.util.concurrent.Executors;
             } finally {
                 actionDisableProperties.forEach(property -> property.set(false));
                 stage.getScene().setCursor(Cursor.DEFAULT);
+            }
+        });
+    }
+
+    void runAsync(Collection<BooleanProperty> actionDisableProperties, Runnable action) {
+        executor.execute(() -> {
+            actionDisableProperties.forEach(property -> property.set(true));
+
+            try {
+                action.run();
+            } finally {
+                actionDisableProperties.forEach(property -> property.set(false));
             }
         });
     }
