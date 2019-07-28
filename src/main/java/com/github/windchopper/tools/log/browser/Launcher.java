@@ -1,7 +1,7 @@
 package com.github.windchopper.tools.log.browser;
 
-import com.github.windchopper.common.fx.event.FXMLResourceOpen;
-import com.github.windchopper.common.fx.event.ResourceBundleLoading;
+import com.github.windchopper.common.fx.event.ResourceBundleLoad;
+import com.github.windchopper.common.fx.form.StageFormLoad;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.jboss.weld.environment.se.Weld;
@@ -26,9 +26,9 @@ public class Launcher extends Application {
     @Override public void start(Stage primaryStage) {
         var beanManager = weldContainer.getBeanManager();
         beanManager.fireEvent(
-            new ResourceBundleLoading(Globals.bundle));
+            new ResourceBundleLoad(Globals.bundle));
         beanManager.fireEvent(
-            new FXMLResourceOpen(primaryStage, Globals.FXML__MAIN));
+            new StageFormLoad(() -> primaryStage, Globals.FXML__MAIN));
     }
 
     /*

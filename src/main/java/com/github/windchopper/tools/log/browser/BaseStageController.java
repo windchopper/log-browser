@@ -1,8 +1,9 @@
 package com.github.windchopper.tools.log.browser;
 
-import com.github.windchopper.common.fx.application.StageController;
+import com.github.windchopper.common.fx.form.StageFormController;
 import com.github.windchopper.common.util.Pipeliner;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
@@ -14,20 +15,13 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-import static java.util.Collections.singletonList;
-
-abstract class BaseStageController extends StageController {
+abstract class BaseStageController extends StageFormController {
 
     private static final Image iconImage = new Image("/com/github/windchopper/tools/log/browser/images/scroll-48.png");
 
-    @Override protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
-        super.start(
-            Pipeliner.of(stage)
-                .add(target -> target::getIcons, singletonList(iconImage))
-                .get(),
-            fxmlResource,
-            parameters,
-            fxmlLoaderNamespace);
+    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
+        super.afterLoad(form, parameters, formNamespace);
+        stage.getIcons().add(iconImage);
     }
 
     @Override protected Alert prepareAlert(Supplier<Alert> constructor) {

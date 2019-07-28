@@ -2,18 +2,20 @@ package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.CellFactories;
 import com.github.windchopper.common.fx.DelegatingStringConverter;
-import com.github.windchopper.common.fx.annotation.FXMLResource;
-import com.github.windchopper.common.fx.event.FXMLResourceOpen;
+import com.github.windchopper.common.fx.form.Form;
+import com.github.windchopper.common.fx.form.FormLoad;
+import com.github.windchopper.common.fx.form.StageFormLoad;
 import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory;
 import com.github.windchopper.common.fx.spinner.NumberType;
 import com.github.windchopper.common.util.Builder;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
-import com.github.windchopper.tools.log.browser.events.ConfirmPaths;
-import com.github.windchopper.tools.log.browser.events.SaveConfiguration;
+import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
+import com.github.windchopper.tools.log.browser.events.PathListConfirm;
 import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -30,10 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@ApplicationScoped @FXMLResource(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
+@ApplicationScoped @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
 
-    @Inject private Event<FXMLResourceOpen> fxmlResourceOpenEvent;
-    @Inject private Event<SaveConfiguration> saveConfigurationEvent;
+    @Inject private Event<FormLoad> fxmlResourceOpenEvent;
+    @Inject private Event<ConfigurationSave> saveConfigurationEvent;
 
     @Inject private AsyncRunner asyncRunner;
 
@@ -49,8 +51,9 @@ import java.util.Optional;
 
     private Connection connection;
 
-    @Override protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
-        super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
+    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
+        super.afterLoad(form, parameters, formNamespace);
+
         stage.setResizable(false);
 
         typeBox.getItems().addAll(ConnectionType.values());
@@ -87,8 +90,8 @@ import java.util.Optional;
             passwordField.getText());
     }
 
-    void pathListConfirmed(@Observes ConfirmPaths confirmPaths) {
-        pathListArea.setText(String.join("; ", confirmPaths.paths()));
+    void pathListConfirmed(@Observes PathListConfirm confirmPathList) {
+        pathListArea.setText(String.join("; ", confirmPathList.paths()));
     }
 
     @FXML public void typeSelected(ActionEvent event) {
@@ -105,7 +108,7 @@ import java.util.Optional;
         connection.setPathList(List.of(StringUtils.trimToEmpty(pathListArea.getText())
             .split("\\s*?[;]\\s*?")));
 
-        saveConfigurationEvent.fire(new SaveConfiguration());
+        saveConfigurationEvent.fire(new ConfigurationSave());
 
         stage.close();
     }
@@ -115,7 +118,7 @@ import java.util.Optional;
             try {
                 RemoteFileSystem fileSystem = newFileSystem();
                 fxmlResourceOpenEvent.fire(
-                    new FXMLResourceOpen(
+                    new StageFormLoad(
                         Builder.of(Stage::new)
                             .set(stage -> stage::initOwner, stage)
                             .set(stage -> stage::initModality, Modality.WINDOW_MODAL),

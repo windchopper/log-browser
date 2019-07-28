@@ -2,11 +2,11 @@ package com.github.windchopper.tools.log.browser.events;
 
 import java.util.Collection;
 
-public class ConfirmPaths {
+public class PathListConfirm {
 
     private final Collection<String> paths;
 
-    public ConfirmPaths(Collection<String> paths) {
+    public PathListConfirm(Collection<String> paths) {
         this.paths = paths;
     }
 

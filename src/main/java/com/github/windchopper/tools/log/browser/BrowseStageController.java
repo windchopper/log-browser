@@ -1,7 +1,7 @@
 package com.github.windchopper.tools.log.browser;
 
-import com.github.windchopper.common.fx.annotation.FXMLResource;
-import com.github.windchopper.tools.log.browser.events.ConfirmPaths;
+import com.github.windchopper.common.fx.form.Form;
+import com.github.windchopper.tools.log.browser.events.PathListConfirm;
 import com.github.windchopper.tools.log.browser.fs.RemoteFile;
 import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
 import com.github.windchopper.tools.log.browser.fx.FileListCell;
@@ -10,8 +10,8 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -30,9 +30,9 @@ import java.util.logging.Level;
 
 import static java.util.stream.Collectors.toList;
 
-@ApplicationScoped @FXMLResource(Globals.FXML__BROWSE) @Named("BrowseStageController") public class BrowseStageController extends BaseStageController {
+@ApplicationScoped @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") public class BrowseStageController extends BaseStageController {
 
-    @Inject private Event<ConfirmPaths> confirmPathListEvent;
+    @Inject private Event<PathListConfirm> confirmPathListEvent;
     @Inject private AsyncRunner asyncRunner;
 
     @FXML private TextField pathField;
@@ -43,8 +43,9 @@ import static java.util.stream.Collectors.toList;
 
     private final Map<String, BooleanProperty> selectedStateBuffer = new HashMap<>();
 
-    @Override protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
-        super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
+    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
+        super.afterLoad(form, parameters, fxmlLoaderNamespace);
+
         stage.setOnCloseRequest(event -> closeFileSystem());
 
         fileSystem = (RemoteFileSystem) parameters.get("fileSystem");
@@ -179,7 +180,7 @@ import static java.util.stream.Collectors.toList;
 
     @FXML public void confirmPressed(ActionEvent event) {
         stage.close();
-        confirmPathListEvent.fire(new ConfirmPaths(selectedStateBuffer.entrySet().stream()
+        confirmPathListEvent.fire(new PathListConfirm(selectedStateBuffer.entrySet().stream()
             .filter(entry -> entry.getValue().get())
             .map(Entry::getKey)
             .collect(toList())));

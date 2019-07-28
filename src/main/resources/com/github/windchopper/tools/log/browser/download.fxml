@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress JavaFxUnresolvedFxIdReference-->
+<!--suppress JSUnusedLocalSymbols-->
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.DownloadTabController">
+    <fx:define>
+        <Insets top="4.0" left="4.0" bottom="4.0" right="4.0" fx:id="insets"/>
+    </fx:define>
+    <padding>
+        <fx:reference source="insets"/>
+    </padding>
+    <TitledPane collapsible="false" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.margin="$insets" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" text="%com.github.windchopper.tools.log.browser.download.progress">
+        <GridPane>
+            <ProgressBar maxWidth="Infinity" fx:id="progressBar" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
+        </GridPane>
+    </TitledPane>
+    <TitledPane collapsible="false" maxHeight="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" text="%com.github.windchopper.tools.log.browser.download.connections">
+        <GridPane>
+        </GridPane>
+    </TitledPane>
+</GridPane>

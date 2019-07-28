@@ -4,14 +4,14 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane minHeight="50.0" minWidth="200.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
+<BorderPane minHeight="100" minWidth="200" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.windchopper.tools.log.browser.MainStageController">
     <padding>
-        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+        <Insets bottom="2" left="2" right="2" top="2"/>
     </padding>
     <top>
         <ToolBar>
             <padding>
-                <Insets top="2.0" bottom="4.0"/>
+                <Insets top="2" bottom="4"/>
             </padding>
             <MenuButton fx:id="configurationButton" text="%com.github.windchopper.tools.log.browser.main.configuration">
                 <items>
@@ -19,8 +19,6 @@
                     <MenuItem fx:id="exportConfigurationMenuItem" text="%com.github.windchopper.tools.log.browser.main.exportConfiguration"/>
                 </items>
             </MenuButton>
-            <Separator/>
-            <Button fx:id="gatherButton" text="%com.github.windchopper.tools.log.browser.main.gather" onAction="#gatherPressed"/>
         </ToolBar>
     </top>
     <fx:define>
@@ -33,6 +31,8 @@
                 <contextMenu>
                     <ContextMenu onShowing="#contextMenuShowing">
                         <items>
+                            <MenuItem fx:id="downloadMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.download" onAction="#downloadSelected"/>
+                            <SeparatorMenuItem/>
                             <Menu text="%com.github.windchopper.tools.log.browser.main.tree.menu.add">
                                 <MenuItem fx:id="addGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addGroup" onAction="#addGroupSelected"/>
                                 <SeparatorMenuItem/>
@@ -48,7 +48,7 @@
                     </ContextMenu>
                 </contextMenu>
             </TreeView>
-            <BorderPane fx:id="workareaPane"/>
+            <TabPane fx:id="workareaPane"/>
         </SplitPane>
     </center>
 </BorderPane>

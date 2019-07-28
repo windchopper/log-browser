@@ -12,7 +12,7 @@ public interface Globals {
     String FXML__CONNECTION = "com/github/windchopper/tools/log/browser/connection.fxml";
     String FXML__BROWSE = "com/github/windchopper/tools/log/browser/browse.fxml";
     String FXML__GROUP = "com/github/windchopper/tools/log/browser/group.fxml";
-    String FXML__GATHERING = "com/github/windchopper/tools/log/browser/gathering.fxml";
+    String FXML__DOWNLOAD = "com/github/windchopper/tools/log/browser/download.fxml";
 
     ResourceBundle bundle = ResourceBundle.getBundle("com.github.windchopper.tools.log.browser.i18n.messages");
 

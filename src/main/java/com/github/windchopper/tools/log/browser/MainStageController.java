@@ -1,21 +1,22 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.CellFactories;
-import com.github.windchopper.common.fx.annotation.FXMLResource;
-import com.github.windchopper.common.fx.event.FXMLResourceOpen;
+import com.github.windchopper.common.fx.form.Form;
+import com.github.windchopper.common.fx.form.FormLoad;
+import com.github.windchopper.common.fx.form.StageFormLoad;
 import com.github.windchopper.common.util.Builder;
 import com.github.windchopper.common.util.Pipeliner;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.Group;
-import com.github.windchopper.tools.log.browser.events.SaveConfiguration;
-import javafx.beans.property.BooleanProperty;
+import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
+import com.github.windchopper.tools.log.browser.events.TabFormLoad;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -27,14 +28,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static java.util.function.Predicate.not;
 
-@ApplicationScoped @FXMLResource(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
+@ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
 
-    @Inject private Event<FXMLResourceOpen> fxmlResourceOpenEvent;
-    @Inject private Event<SaveConfiguration> saveConfigurationEvent;
+    @Inject private Event<FormLoad> formLoadEvent;
+    @Inject private Event<ConfigurationSave> configurationSaveEvent;
     @Inject private ConfigurationAccess configurationAccess;
     @Inject private AsyncRunner asyncRunner;
 
@@ -43,18 +45,17 @@ import static java.util.function.Predicate.not;
     @FXML private MenuButton configurationButton;
     @FXML private MenuItem importConfigurationMenuItem;
     @FXML private MenuItem exportConfigurationMenuItem;
-    @FXML private Button gatherButton;
+    @FXML private MenuItem downloadMenuItem;
     @FXML private MenuItem addGroupMenuItem;
     @FXML private MenuItem addConnectionMenuItem;
     @FXML private MenuItem removeMenuItem;
     @FXML private MenuItem groupMenuItem;
     @FXML private MenuItem ungroupMenuItem;
     @FXML private MenuItem propertiesMenuItem;
-    @FXML private BorderPane workareaPane;
+    @FXML private TabPane workareaPane;
 
-    @Override
-    protected void start(Stage stage, String fxmlResource, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
-        super.start(stage, fxmlResource, parameters, fxmlLoaderNamespace);
+    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
+        super.afterLoad(form, parameters, formNamespace);
 
         stage.setTitle(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.title"));
 
@@ -62,7 +63,7 @@ import static java.util.function.Predicate.not;
 
         configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item, empty) -> cell.setText(empty || item == null ? null : item.getName())));
-        configurationTreeView.setOnEditCommit(editEvent -> saveConfigurationEvent.fire(new SaveConfiguration()));
+        configurationTreeView.setOnEditCommit(editEvent -> configurationSaveEvent.fire(new ConfigurationSave()));
     }
 
     private <T extends ConfigurationElement> void loadWithConfigurationNode(TreeItem<ConfigurationElement> item, T configurationNode) {
@@ -87,7 +88,7 @@ import static java.util.function.Predicate.not;
         }
     }
 
-    void saveConfiguration(@Observes SaveConfiguration saveConfiguration) {
+    void saveConfiguration(@Observes ConfigurationSave saveConfiguration) {
         asyncRunner.runAsync(stage, List.of(), () -> {
             try {
                 configurationAccess.saveConfiguration();
@@ -116,8 +117,8 @@ import static java.util.function.Predicate.not;
     }
 
     private void openWindow(String fxmlResource, String parameterName, Object parameter) {
-        asyncRunner.runAsync(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> fxmlResourceOpenEvent.fire(
-            new FXMLResourceOpen(
+        asyncRunner.runAsync(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> formLoadEvent.fire(
+            new StageFormLoad(
                 Builder.of(Stage::new)
                     .set(stage -> stage::initOwner, this.stage)
                     .set(stage -> stage::initModality, Modality.WINDOW_MODAL),
@@ -133,19 +134,14 @@ import static java.util.function.Predicate.not;
         openWindow(Globals.FXML__GROUP, "group", group);
     }
 
-    @FXML public void gatherPressed(ActionEvent event) {
-        List<BooleanProperty> disableProperties = List.of(
-            configurationButton.disableProperty(),
-            gatherButton.disableProperty(),
-            configurationTreeView.disableProperty());
-
-        asyncRunner.runAsync(stage, disableProperties, () -> {
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
+    @FXML public void downloadSelected(ActionEvent event) {
+        formLoadEvent.fire(new TabFormLoad(
+            Pipeliner.of(Tab::new)
+                .set(tab -> tab::setText, String.format("%1$tR %1$tT", LocalDateTime.now()))
+                .accept(tab -> workareaPane.getTabs().add(tab))
+                .get(),
+            Globals.FXML__DOWNLOAD,
+            Map.of("selection", List.copyOf(configurationTreeView.getSelectionModel().getSelectedItems()))));
     }
 
     @FXML public void addGroupSelected(ActionEvent event) {
@@ -175,7 +171,7 @@ import static java.util.function.Predicate.not;
             selectionModel.clearSelection();
             selectionModel.select(connectionItem);
 
-            saveConfigurationEvent.fire(new SaveConfiguration());
+            configurationSaveEvent.fire(new ConfigurationSave());
 
             openGroupWindow(group);
         }
@@ -198,7 +194,7 @@ import static java.util.function.Predicate.not;
             selectionModel.clearSelection();
             selectionModel.select(connectionItem);
 
-            saveConfigurationEvent.fire(new SaveConfiguration());
+            configurationSaveEvent.fire(new ConfigurationSave());
 
             openConnectionWindow(connection);
         }
@@ -240,7 +236,7 @@ import static java.util.function.Predicate.not;
             }
         }
 
-        saveConfigurationEvent.fire(new SaveConfiguration());
+        configurationSaveEvent.fire(new ConfigurationSave());
     }
 
     @FXML public void groupSelected(ActionEvent event) {
