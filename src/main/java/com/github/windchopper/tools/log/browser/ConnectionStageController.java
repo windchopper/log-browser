@@ -13,13 +13,13 @@ import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
 import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
 import com.github.windchopper.tools.log.browser.events.PathListConfirm;
 import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -45,7 +45,7 @@ import java.util.Optional;
     @FXML private Spinner<Number> portSpinner;
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private TextArea pathListArea;
+    @FXML private ListView<String> pathListView;
 
     @FXML private Button choosePathListButton;
 
@@ -71,7 +71,7 @@ import java.util.Optional;
             portSpinner.getValueFactory().setValue(connection.getPort());
             usernameField.setText(connection.getUsername());
             passwordField.setText(connection.getPassword());
-            pathListArea.setText(String.join("; ", Optional.ofNullable(connection.getPathList())
+            pathListView.setItems(FXCollections.observableList(Optional.ofNullable(connection.getPathList())
                 .orElseGet(Collections::emptyList)));
         }
     }
@@ -91,7 +91,7 @@ import java.util.Optional;
     }
 
     void pathListConfirmed(@Observes PathListConfirm confirmPathList) {
-        pathListArea.setText(String.join("; ", confirmPathList.paths()));
+        pathListView.setItems(FXCollections.observableList(confirmPathList.paths()));
     }
 
     @FXML public void typeSelected(ActionEvent event) {
@@ -105,8 +105,7 @@ import java.util.Optional;
         connection.setPort(portSpinner.getValue().intValue());
         connection.setUsername(usernameField.getText());
         connection.setPassword(passwordField.getText());
-        connection.setPathList(List.of(StringUtils.trimToEmpty(pathListArea.getText())
-            .split("\\s*?[;]\\s*?")));
+        connection.setPathList(List.copyOf(pathListView.getItems()));
 
         saveConfigurationEvent.fire(new ConfigurationSave());
 

@@ -30,7 +30,7 @@
     <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.password"/>
     <PasswordField fx:id="passwordField" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
     <Label GridPane.halignment="RIGHT" GridPane.valignment="BASELINE" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.pathList"/>
-    <TextArea fx:id="pathListArea" prefRowCount="4" GridPane.columnSpan="3" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets"/>
+    <ListView fx:id="pathListView" prefHeight="100" GridPane.columnSpan="3" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.fillHeight="true" GridPane.vgrow="ALWAYS" GridPane.margin="$insets"/>
     <HBox alignment="CENTER_RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="4" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets">
         <fx:define>
             <Insets left="4" fx:id="buttonInsets"/>
