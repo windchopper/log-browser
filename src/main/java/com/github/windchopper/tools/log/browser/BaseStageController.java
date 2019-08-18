@@ -1,17 +1,16 @@
 package com.github.windchopper.tools.log.browser;
 
+import com.github.windchopper.common.fx.dialog.OptionDialog;
+import com.github.windchopper.common.fx.dialog.OptionDialogModel;
 import com.github.windchopper.common.fx.form.StageFormController;
-import com.github.windchopper.common.util.Pipeliner;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 abstract class BaseStageController extends StageFormController implements FormControllerRoutines {
@@ -23,25 +22,17 @@ abstract class BaseStageController extends StageFormController implements FormCo
         stage.getIcons().add(iconImage);
     }
 
-    @Override protected Alert prepareAlert(Supplier<Alert> constructor) {
-        return Pipeliner.of(super.prepareAlert(constructor))
-            .accept(alert -> ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(iconImage))
-            .get();
-    }
-
-    private void alert(Alert.AlertType alertType, String message) {
-        runWithFxThread(() -> prepareAlert(Pipeliner.of(() -> new Alert(alertType, message, ButtonType.OK))
-            .set(bean -> bean::initOwner, topLevelStage(stage))
-            .set(bean -> bean::initModality, Modality.WINDOW_MODAL))
-            .show());
+    private void alert(OptionDialog.Type alertType, String message) {
+        runWithFxThread(() -> OptionDialog.showOptionDialog(message, alertType, List.of(OptionDialogModel.Option.OK),
+            prepareStageDialogFrame(iconImage, Modality.WINDOW_MODAL, false)));
     }
 
     void informationAlert(String message) {
-        alert(Alert.AlertType.INFORMATION, message);
+        alert(OptionDialog.Type.INFORMATION, message);
     }
 
-    @SuppressWarnings("WeakerAccess") void errorAlert(String message) {
-        alert(Alert.AlertType.ERROR, message);
+    void errorAlert(String message) {
+        alert(OptionDialog.Type.ERROR, message);
     }
 
     void errorLogAndAlert(Exception exception) {
