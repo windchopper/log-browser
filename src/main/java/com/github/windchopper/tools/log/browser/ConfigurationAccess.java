@@ -1,7 +1,6 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.util.Pipeliner;
-import com.github.windchopper.common.util.SystemProperty;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -19,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +37,10 @@ import java.util.logging.Logger;
 
     @PostConstruct private void afterConstruction() {
         try {
-            configurationFile = SystemProperty.USER_HOME.read(Paths::get)
-                .orElseGet(() -> Paths.get(""))
-                .resolve(".log-browser/configuration.xml");
+            configurationFile = Paths.get(Optional.ofNullable(System.getProperty("user.home"))
+                .orElse(""))
+                .resolve(".log-browser")
+                .resolve("configuration.xml");
 
             try {
                 JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);

@@ -2,12 +2,13 @@ package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.CellFactories;
 import com.github.windchopper.common.fx.DelegatingStringConverter;
-import com.github.windchopper.common.fx.form.Form;
-import com.github.windchopper.common.fx.form.FormLoad;
-import com.github.windchopper.common.fx.form.StageFormLoad;
+import com.github.windchopper.common.fx.cdi.form.Form;
+import com.github.windchopper.common.fx.cdi.form.FormLoad;
+import com.github.windchopper.common.fx.cdi.form.StageFormLoad;
 import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory;
 import com.github.windchopper.common.fx.spinner.NumberType;
 import com.github.windchopper.common.util.Builder;
+import com.github.windchopper.common.util.ClassPathResource;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
 import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
@@ -118,11 +119,11 @@ import java.util.Optional;
                 RemoteFileSystem fileSystem = newFileSystem();
                 fxmlResourceOpenEvent.fire(
                     new StageFormLoad(
+                        new ClassPathResource(Globals.FXML__BROWSE),
+                        Map.of("fileSystem", fileSystem),
                         Builder.of(Stage::new)
                             .set(stage -> stage::initOwner, stage)
-                            .set(stage -> stage::initModality, Modality.WINDOW_MODAL),
-                        Globals.FXML__BROWSE,
-                        Map.of("fileSystem", fileSystem)));
+                            .set(stage -> stage::initModality, Modality.WINDOW_MODAL)));
             } catch (IOException thrown) {
                 errorLogAndAlert(thrown);
             }

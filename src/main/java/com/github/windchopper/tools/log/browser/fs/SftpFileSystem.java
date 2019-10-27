@@ -2,7 +2,6 @@ package com.github.windchopper.tools.log.browser.fs;
 
 import com.github.windchopper.common.preferences.PreferencesEntry;
 import com.github.windchopper.common.preferences.types.FlatType;
-import com.github.windchopper.common.util.SystemProperty;
 import com.github.windchopper.tools.log.browser.Globals;
 import com.jcraft.jsch.*;
 import org.apache.commons.collections4.map.LRUMap;
@@ -89,7 +88,8 @@ public class SftpFileSystem extends RemoteFileSystem implements AutoCloseable {
     }
 
     private Optional<Path> defaultSecureShellConfigurationDirectory() {
-        return SystemProperty.USER_HOME.read(Paths::get)
+        return Optional.ofNullable(System.getProperty("user.home"))
+            .map(Paths::get)
             .map(path -> path.resolve(".ssh"));
     }
 
@@ -118,7 +118,7 @@ public class SftpFileSystem extends RemoteFileSystem implements AutoCloseable {
         return new SftpFile("/", true);
     }
 
-    @Override @SuppressWarnings("unchecked") public List<RemoteFile> children(String path) throws IOException {
+    @Override @SuppressWarnings({ "rawtypes", "unchecked" }) public List<RemoteFile> children(String path) throws IOException {
         try {
             var instant = Instant.now();
             var savedInstant = childListInstantMap.computeIfAbsent(path, missingPath -> Instant.MIN);

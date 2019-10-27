@@ -1,11 +1,13 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.CellFactories;
-import com.github.windchopper.common.fx.form.Form;
-import com.github.windchopper.common.fx.form.FormLoad;
-import com.github.windchopper.common.fx.form.StageFormLoad;
+import com.github.windchopper.common.fx.cdi.form.Form;
+import com.github.windchopper.common.fx.cdi.form.FormLoad;
+import com.github.windchopper.common.fx.cdi.form.StageFormLoad;
 import com.github.windchopper.common.util.Builder;
+import com.github.windchopper.common.util.ClassPathResource;
 import com.github.windchopper.common.util.Pipeliner;
+import com.github.windchopper.common.util.Resource;
 import com.github.windchopper.tools.log.browser.configuration.Configuration;
 import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
 import com.github.windchopper.tools.log.browser.configuration.Connection;
@@ -116,33 +118,32 @@ import static java.util.function.Predicate.not;
             .count());
     }
 
-    private void openWindow(String fxmlResource, String parameterName, Object parameter) {
+    private void openWindow(Resource fxmlResource, String parameterName, Object parameter) {
         asyncRunner.runAsyncWithBusyPointer(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> formLoadEvent.fire(
             new StageFormLoad(
+                fxmlResource,
+                Map.of(parameterName, parameter),
                 Builder.of(Stage::new)
                     .set(stage -> stage::initOwner, this.stage)
-                    .set(stage -> stage::initModality, Modality.WINDOW_MODAL),
-                fxmlResource,
-                Map.of(parameterName, parameter))));
+                    .set(stage -> stage::initModality, Modality.WINDOW_MODAL))));
     }
 
     private void openConnectionWindow(Connection connection) {
-        openWindow(Globals.FXML__CONNECTION, "connection", connection);
+        openWindow(new ClassPathResource(Globals.FXML__CONNECTION), "connection", connection);
     }
 
     private void openGroupWindow(Group group) {
-        openWindow(Globals.FXML__GROUP, "group", group);
+        openWindow(new ClassPathResource(Globals.FXML__GROUP), "group", group);
     }
 
     @FXML public void downloadSelected(ActionEvent event) {
         formLoadEvent.fire(new TabFormLoad(
+            new ClassPathResource(Globals.FXML__DOWNLOAD),
+            Map.of("selection", List.copyOf(configurationTreeView.getSelectionModel().getSelectedItems())),
             Pipeliner.of(Tab::new)
                 .set(tab -> tab::setText, String.format("%1$tF %1$tT", LocalDateTime.now()))
                 .accept(tab -> workareaPane.getTabs().add(tab))
-                .accept(tab -> workareaPane.getSelectionModel().select(tab))
-                .get(),
-            Globals.FXML__DOWNLOAD,
-            Map.of("selection", List.copyOf(configurationTreeView.getSelectionModel().getSelectedItems()))));
+                .accept(tab -> workareaPane.getSelectionModel().select(tab))));
     }
 
     @FXML public void addGroupSelected(ActionEvent event) {

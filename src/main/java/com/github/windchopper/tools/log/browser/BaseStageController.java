@@ -2,7 +2,7 @@ package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.fx.dialog.OptionDialog;
 import com.github.windchopper.common.fx.dialog.OptionDialogModel;
-import com.github.windchopper.common.fx.form.StageFormController;
+import com.github.windchopper.common.fx.cdi.form.StageFormController;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;

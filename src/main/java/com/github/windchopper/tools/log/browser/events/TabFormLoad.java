@@ -1,29 +1,31 @@
 package com.github.windchopper.tools.log.browser.events;
 
-import com.github.windchopper.common.fx.form.FormLoad;
+import com.github.windchopper.common.fx.cdi.form.FormLoad;
+import com.github.windchopper.common.util.Resource;
 import javafx.collections.ObservableMap;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 
 import java.util.Map;
+import java.util.function.Supplier;
+
+import static java.util.Collections.emptyMap;
 
 public class TabFormLoad extends FormLoad {
 
-    private Tab tab;
+    private final Supplier<Tab> tabSupplier;
 
-    public TabFormLoad(Tab tab, String resource) {
-        super(resource);
-        this.tab = tab;
+    public TabFormLoad(Resource resource, Supplier<Tab> tabSupplier) {
+        this(resource, emptyMap(), tabSupplier);
     }
 
-    public TabFormLoad(Tab tab, String resource, Map<String, ?> parameters) {
+    public TabFormLoad(Resource resource, Map<String, ?> parameters, Supplier<Tab> tabSupplier) {
         super(resource, parameters);
-        this.tab = tab;
+        this.tabSupplier = tabSupplier;
     }
 
-    @Override
-    public void afterLoad(Parent form, Object controller, Map<String, ?> parameters, ObservableMap<String, ?> formNamespace) {
-        tab.setContent(form);
+    @Override public void afterLoad(Parent form, Object controller, Map<String, ?> parameters, ObservableMap<String, ?> formNamespace) {
+        tabSupplier.get().setContent(form);
         super.afterLoad(form, controller, parameters, formNamespace);
     }
 

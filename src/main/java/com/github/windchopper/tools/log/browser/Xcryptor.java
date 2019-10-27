@@ -1,7 +1,6 @@
 package com.github.windchopper.tools.log.browser;
 
 import com.github.windchopper.common.preferences.PreferencesEntry;
-import com.github.windchopper.common.util.SystemProperty;
 import com.github.windchopper.tools.log.browser.preferences.ByteArrayType;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +14,7 @@ import javax.inject.Named;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Optional;
 
 @ApplicationScoped @Named("Xcryptor") public class Xcryptor {
 
@@ -39,7 +39,7 @@ import java.util.Base64;
             cipher = Cipher.getInstance(TRANSFORMATION);
             parameters = new PBEParameterSpec(salt, ITERATION_COUNT);
             key = SecretKeyFactory.getInstance(cipher.getAlgorithm()).generateSecret(
-                new PBEKeySpec(SystemProperty.USER_NAME.read()
+                new PBEKeySpec(Optional.ofNullable(System.getProperty("user.name"))
                     .orElseThrow(() -> new IllegalStateException("Cannot determine user name"))
                     .toCharArray()));
         } catch (GeneralSecurityException thrown) {

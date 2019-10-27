@@ -1,6 +1,6 @@
 package com.github.windchopper.tools.log.browser;
 
-import com.github.windchopper.common.fx.form.Form;
+import com.github.windchopper.common.fx.cdi.form.Form;
 import com.github.windchopper.tools.log.browser.events.PathListConfirm;
 import com.github.windchopper.tools.log.browser.fs.RemoteFile;
 import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
