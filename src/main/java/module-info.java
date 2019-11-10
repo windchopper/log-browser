@@ -19,7 +19,7 @@ module windchopper.tools.log.browser {
     requires weld.core.impl;
     requires org.apache.commons.lang3;
     requires org.apache.commons.collections4;
-    requires jsch;
+    requires windchopper.fs;
     requires windchopper.common.fx;
     requires windchopper.common.fx.cdi;
     requires windchopper.common.preferences;

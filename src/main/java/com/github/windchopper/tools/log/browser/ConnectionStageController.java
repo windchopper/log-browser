@@ -13,7 +13,6 @@ import com.github.windchopper.tools.log.browser.configuration.Connection;
 import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
 import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
 import com.github.windchopper.tools.log.browser.events.PathListConfirm;
-import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,6 +27,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +77,7 @@ import java.util.Optional;
         }
     }
 
-    private RemoteFileSystem newFileSystem() throws IOException {
+    private FileSystem newFileSystem() throws IOException {
         ConnectionType connectionType = typeBox.getValue();
 
         if (connectionType == null) {
@@ -116,11 +116,10 @@ import java.util.Optional;
     @FXML public void choosePathListButton(ActionEvent event) {
         asyncRunner.runAsyncWithBusyPointer(stage, List.of(choosePathListButton.disableProperty()), () -> {
             try {
-                RemoteFileSystem fileSystem = newFileSystem();
                 fxmlResourceOpenEvent.fire(
                     new StageFormLoad(
                         new ClassPathResource(Globals.FXML__BROWSE),
-                        Map.of("fileSystem", fileSystem),
+                        Map.of("fileSystem", newFileSystem()),
                         Builder.of(Stage::new)
                             .set(stage -> stage::initOwner, stage)
                             .set(stage -> stage::initModality, Modality.WINDOW_MODAL)));

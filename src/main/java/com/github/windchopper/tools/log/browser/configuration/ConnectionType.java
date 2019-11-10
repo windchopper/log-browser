@@ -1,10 +1,14 @@
 package com.github.windchopper.tools.log.browser.configuration;
 
+import com.github.windchopper.fs.sftp.SftpConstants;
 import com.github.windchopper.tools.log.browser.Globals;
-import com.github.windchopper.tools.log.browser.fs.RemoteFileSystem;
-import com.github.windchopper.tools.log.browser.fs.SftpFileSystem;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.util.Map;
 
 public enum ConnectionType {
 
@@ -12,8 +16,13 @@ public enum ConnectionType {
         Globals.bundle.getString("com.github.windchopper.tools.log.browser.secureFileTransfer.title"),
         Globals.bundle.getString("com.github.windchopper.tools.log.browser.secureFileTransfer.description")) {
 
-        @Override public RemoteFileSystem newFileSystem(String host, int port, String username, String password) {
-            return new SftpFileSystem(host, port, username, password);
+        @Override public FileSystem newFileSystem(String host, int port, String username, String password) throws IOException {
+            try {
+                return FileSystems.newFileSystem(new URI(SftpConstants.SCHEME, null, host, port, null, null, null),
+                    Map.of(SftpConstants.USERNAME, username, SftpConstants.PASSWORD, password));
+            } catch (URISyntaxException thrown) {
+                throw new IOException(thrown.getMessage(), thrown);
+            }
         }
 
     };
@@ -50,7 +59,7 @@ public enum ConnectionType {
         return String.format("%s (%s)", description, title);
     }
 
-    public abstract RemoteFileSystem newFileSystem(String host, int port, String username, String password)
+    public abstract FileSystem newFileSystem(String host, int port, String username, String password)
         throws IOException;
 
 }

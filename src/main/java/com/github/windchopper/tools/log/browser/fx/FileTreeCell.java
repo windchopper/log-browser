@@ -1,7 +1,6 @@
 package com.github.windchopper.tools.log.browser.fx;
 
 import com.github.windchopper.common.util.Pipeliner;
-import com.github.windchopper.tools.log.browser.fs.RemoteFile;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TreeCell;
@@ -57,9 +56,9 @@ public class FileTreeCell extends TreeCell<RemoteFile> {
                 checkBox.selectedProperty().bindBidirectional(booleanProperty);
             }
 
-            checkBox.setVisible(file != null && file.directory());
+            checkBox.setVisible(file != null && file.isDirectory());
             checkBox.setIndeterminate(file != null && !checkBox.isSelected() && selectedStateBuffer.entrySet().stream()
-                .anyMatch(entry -> entry.getValue().get() && StringUtils.startsWith(entry.getKey(), file.path())));
+                .anyMatch(entry -> entry.getValue().get() && StringUtils.startsWith(entry.getKey(), file.getPath().toString())));
         }
     }
 
