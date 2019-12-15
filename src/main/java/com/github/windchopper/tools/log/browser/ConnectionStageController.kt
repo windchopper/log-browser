@@ -1,132 +1,118 @@
-package com.github.windchopper.tools.log.browser;
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.fx.CellFactories;
-import com.github.windchopper.common.fx.DelegatingStringConverter;
-import com.github.windchopper.common.fx.cdi.form.Form;
-import com.github.windchopper.common.fx.cdi.form.FormLoad;
-import com.github.windchopper.common.fx.cdi.form.StageFormLoad;
-import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory;
-import com.github.windchopper.common.fx.spinner.NumberType;
-import com.github.windchopper.common.util.Builder;
-import com.github.windchopper.common.util.ClassPathResource;
-import com.github.windchopper.tools.log.browser.configuration.Connection;
-import com.github.windchopper.tools.log.browser.configuration.ConnectionType;
-import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
-import com.github.windchopper.tools.log.browser.events.PathListConfirm;
-import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import com.github.windchopper.common.fx.CellFactories
+import com.github.windchopper.common.fx.DelegatingStringConverter
+import com.github.windchopper.common.fx.cdi.form.Form
+import com.github.windchopper.common.fx.cdi.form.FormLoad
+import com.github.windchopper.common.fx.cdi.form.StageFormLoad
+import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory
+import com.github.windchopper.common.fx.spinner.NumberType
+import com.github.windchopper.common.util.Builder
+import com.github.windchopper.common.util.ClassPathResource
+import com.github.windchopper.tools.log.browser.configuration.Connection
+import com.github.windchopper.tools.log.browser.configuration.ConnectionType
+import com.github.windchopper.tools.log.browser.events.ConfigurationSave
+import com.github.windchopper.tools.log.browser.events.PathListConfirm
+import com.github.windchopper.tools.log.browser.util.generalize
+import com.github.windchopper.tools.log.browser.util.toObservableList
+import javafx.collections.FXCollections
+import javafx.event.ActionEvent
+import javafx.fxml.FXML
+import javafx.scene.Cursor
+import javafx.scene.Parent
+import javafx.scene.control.*
+import javafx.stage.Modality
+import javafx.stage.Stage
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.nio.file.FileSystem
+import java.util.*
+import java.util.function.Consumer
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.event.Event
+import javax.enterprise.event.Observes
+import javax.inject.Inject
+import javax.inject.Named
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+@ApplicationScoped @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") @Suppress("UNUSED_PARAMETER") class ConnectionStageController: BaseStageController() {
 
-@ApplicationScoped @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") public class ConnectionStageController extends BaseStageController {
+    @Inject private lateinit var fxmlResourceOpenEvent: Event<FormLoad>
+    @Inject private lateinit var saveConfigurationEvent: Event<ConfigurationSave>
+    @Inject private lateinit var asyncRunner: AsyncRunner
 
-    @Inject private Event<FormLoad> fxmlResourceOpenEvent;
-    @Inject private Event<ConfigurationSave> saveConfigurationEvent;
+    @FXML private lateinit var nameField: TextField
+    @FXML private lateinit var typeBox: ComboBox<ConnectionType?>
+    @FXML private lateinit var hostField: TextField
+    @FXML private lateinit var portSpinner: Spinner<Number?>
+    @FXML private lateinit var usernameField: TextField
+    @FXML private lateinit var passwordField: PasswordField
+    @FXML private lateinit var pathListView: ListView<String>
+    @FXML private lateinit var choosePathListButton: Button
 
-    @Inject private AsyncRunner asyncRunner;
+    private lateinit var connection: Connection
 
-    @FXML private TextField nameField;
-    @FXML private ComboBox<ConnectionType> typeBox;
-    @FXML private TextField hostField;
-    @FXML private Spinner<Number> portSpinner;
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private ListView<String> pathListView;
-
-    @FXML private Button choosePathListButton;
-
-    private Connection connection;
-
-    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
-        super.afterLoad(form, parameters, formNamespace);
-
-        stage.setResizable(false);
-
-        typeBox.getItems().addAll(ConnectionType.values());
-        typeBox.setConverter(new DelegatingStringConverter<>(ConnectionType::displayName));
-        typeBox.setCellFactory(CellFactories.listCellFactory((cell, item, empty) -> cell.setText(empty || item == null ? null : item.displayName())));
-
-        portSpinner.setValueFactory(new FlexibleSpinnerValueFactory<>(NumberType.INTEGER, 0, 65535, 0));
-
-        connection = (Connection) parameters.get("connection");
-
-        if (connection != null) {
-            nameField.setText(connection.getName());
-            typeBox.setValue(connection.getType());
-            hostField.setText(connection.getHost());
-            portSpinner.getValueFactory().setValue(connection.getPort());
-            usernameField.setText(connection.getUsername());
-            passwordField.setText(connection.getPassword());
-            pathListView.setItems(FXCollections.observableList(Optional.ofNullable(connection.getPathList())
-                .orElseGet(Collections::emptyList)));
+    override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
+        super.afterLoad(form, parameters, formNamespace)
+        stage.isResizable = false
+        typeBox.items.addAll(*ConnectionType.values())
+        typeBox.converter = DelegatingStringConverter { it?.displayName }
+        typeBox.cellFactory = CellFactories.listCellFactory { cell: ListCell<ConnectionType?>, item: ConnectionType?, empty: Boolean -> cell.setText(if (empty || item == null) null else item.displayName) }
+        portSpinner.valueFactory = FlexibleSpinnerValueFactory(NumberType.INTEGER, 0, 65535, 0)
+        connection = (parameters["connection"] as Connection).also {
+            nameField.text = it.name
+            typeBox.value = it.type
+            hostField.text = it.host
+            portSpinner.valueFactory.value = it.port
+            usernameField.text = it.username
+            passwordField.text = it.password
+            pathListView.items = connection.pathList.toObservableList()
         }
     }
 
-    private FileSystem newFileSystem() throws IOException {
-        ConnectionType connectionType = typeBox.getValue();
-
-        if (connectionType == null) {
-            throw new IllegalStateException(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.type.notSelected"));
-        }
-
+    @Throws(IOException::class) private fun newFileSystem(): FileSystem {
+        val connectionType = typeBox.value
+            ?:throw IllegalStateException(Globals.bundle.getString("com.github.windchopper.tools.log.browser.connection.type.notSelected"))
         return connectionType.newFileSystem(
-            hostField.getText(),
-            portSpinner.getValue().intValue(),
-            usernameField.getText(),
-            passwordField.getText());
+            hostField.text,
+            portSpinner.value!!.toInt(),
+            usernameField.text,
+            passwordField.text)
     }
 
-    void pathListConfirmed(@Observes PathListConfirm confirmPathList) {
-        pathListView.setItems(FXCollections.observableList(confirmPathList.paths()));
+    fun pathListConfirmed(@Observes confirmPathList: PathListConfirm) {
+        pathListView.items = confirmPathList.paths.toObservableList()
     }
 
-    @FXML public void typeSelected(ActionEvent event) {
-        portSpinner.getValueFactory().setValue(typeBox.getValue().defaultPort());
+    @FXML fun typeSelected(event: ActionEvent?) {
+        portSpinner.valueFactory.value = typeBox.value!!.defaultPort
     }
 
-    @FXML public void savePressed(ActionEvent event) {
-        connection.setName(nameField.getText());
-        connection.setType(typeBox.getValue());
-        connection.setHost(hostField.getText());
-        connection.setPort(portSpinner.getValue().intValue());
-        connection.setUsername(usernameField.getText());
-        connection.setPassword(passwordField.getText());
-        connection.setPathList(List.copyOf(pathListView.getItems()));
+    @FXML fun savePressed(event: ActionEvent) {
+        with (connection) {
+            name = nameField.text
+            type = typeBox.value
+            host = hostField.text
+            port = portSpinner.value!!.toInt()
+            username = usernameField.text
+            password = passwordField.text
+            pathList = pathListView.items.toMutableList()
+        }
 
-        saveConfigurationEvent.fire(new ConfigurationSave());
-
-        stage.close();
+        saveConfigurationEvent.fire(ConfigurationSave())
+        stage.close()
     }
 
-    @FXML public void choosePathListButton(ActionEvent event) {
-        asyncRunner.runAsyncWithBusyPointer(stage, List.of(choosePathListButton.disableProperty()), () -> {
-            try {
-                fxmlResourceOpenEvent.fire(
-                    new StageFormLoad(
-                        new ClassPathResource(Globals.FXML__BROWSE),
-                        Map.of("fileSystem", newFileSystem()),
-                        Builder.of(Stage::new)
-                            .set(stage -> stage::initOwner, stage)
-                            .set(stage -> stage::initModality, Modality.WINDOW_MODAL)));
-            } catch (IOException thrown) {
-                errorLogAndAlert(thrown);
-            }
-        });
+    @FXML fun choosePathListButton(event: ActionEvent) {
+        launchWithWaitCursor(choosePathListButton.generalize()) {
+            fxmlResourceOpenEvent.fire(
+                StageFormLoad(ClassPathResource(Globals.FXML__BROWSE), mapOf("fileSystem" to newFileSystem())) {
+                    Stage().also {
+                        it.initOwner(stage)
+                        it.initModality(Modality.WINDOW_MODAL)
+                    }
+                })
+        }
     }
 
 }

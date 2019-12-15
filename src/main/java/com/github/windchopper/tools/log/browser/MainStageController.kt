@@ -1,252 +1,226 @@
-package com.github.windchopper.tools.log.browser;
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.fx.CellFactories;
-import com.github.windchopper.common.fx.cdi.form.Form;
-import com.github.windchopper.common.fx.cdi.form.FormLoad;
-import com.github.windchopper.common.fx.cdi.form.StageFormLoad;
-import com.github.windchopper.common.util.Builder;
-import com.github.windchopper.common.util.ClassPathResource;
-import com.github.windchopper.common.util.Pipeliner;
-import com.github.windchopper.common.util.Resource;
-import com.github.windchopper.tools.log.browser.configuration.Configuration;
-import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement;
-import com.github.windchopper.tools.log.browser.configuration.Connection;
-import com.github.windchopper.tools.log.browser.configuration.Group;
-import com.github.windchopper.tools.log.browser.events.ConfigurationSave;
-import com.github.windchopper.tools.log.browser.events.TabFormLoad;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import com.github.windchopper.common.fx.CellFactories
+import com.github.windchopper.common.fx.cdi.form.Form
+import com.github.windchopper.common.fx.cdi.form.FormLoad
+import com.github.windchopper.common.fx.cdi.form.StageFormLoad
+import com.github.windchopper.common.util.Builder
+import com.github.windchopper.common.util.ClassPathResource
+import com.github.windchopper.common.util.Pipeliner
+import com.github.windchopper.common.util.Resource
+import com.github.windchopper.tools.log.browser.Globals.bundle
+import com.github.windchopper.tools.log.browser.configuration.Configuration
+import com.github.windchopper.tools.log.browser.configuration.ConfigurationElement
+import com.github.windchopper.tools.log.browser.configuration.Connection
+import com.github.windchopper.tools.log.browser.configuration.Group
+import com.github.windchopper.tools.log.browser.events.ConfigurationSave
+import com.github.windchopper.tools.log.browser.events.TabFormLoad
+import com.github.windchopper.tools.log.browser.util.generalize
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
+import javafx.fxml.FXML
+import javafx.scene.Parent
+import javafx.scene.control.*
+import javafx.stage.Modality
+import javafx.stage.Stage
+import javafx.stage.WindowEvent
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.util.*
+import java.util.function.Consumer
+import java.util.function.Predicate
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.event.Event
+import javax.enterprise.event.Observes
+import javax.inject.Inject
+import javax.inject.Named
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
+@ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") @Suppress("UNUSED_PARAMETER") class MainStageController: BaseStageController() {
 
-import static java.util.function.Predicate.not;
+    @Inject private lateinit var formLoadEvent: Event<FormLoad>
+    @Inject private lateinit var configurationSaveEvent: Event<ConfigurationSave>
+    @Inject private lateinit var configurationAccess: ConfigurationAccess
 
-@ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") public class MainStageController extends BaseStageController {
+    @FXML private lateinit var configurationTreeView: TreeView<ConfigurationElement>
+    @FXML private lateinit var configurationTreeRoot: TreeItem<ConfigurationElement>
+    @FXML private lateinit var configurationButton: MenuButton
+    @FXML private lateinit var importConfigurationMenuItem: MenuItem
+    @FXML private lateinit var exportConfigurationMenuItem: MenuItem
+    @FXML private lateinit var downloadMenuItem: MenuItem
+    @FXML private lateinit var addGroupMenuItem: MenuItem
+    @FXML private lateinit var addConnectionMenuItem: MenuItem
+    @FXML private lateinit var removeMenuItem: MenuItem
+    @FXML private lateinit var groupMenuItem: MenuItem
+    @FXML private lateinit var ungroupMenuItem: MenuItem
+    @FXML private lateinit var propertiesMenuItem: MenuItem
+    @FXML private lateinit var workareaPane: TabPane
 
-    @Inject private Event<FormLoad> formLoadEvent;
-    @Inject private Event<ConfigurationSave> configurationSaveEvent;
-    @Inject private ConfigurationAccess configurationAccess;
-    @Inject private AsyncRunner asyncRunner;
-
-    @FXML private TreeView<ConfigurationElement> configurationTreeView;
-    @FXML private TreeItem<ConfigurationElement> configurationTreeRoot;
-    @FXML private MenuButton configurationButton;
-    @FXML private MenuItem importConfigurationMenuItem;
-    @FXML private MenuItem exportConfigurationMenuItem;
-    @FXML private MenuItem downloadMenuItem;
-    @FXML private MenuItem addGroupMenuItem;
-    @FXML private MenuItem addConnectionMenuItem;
-    @FXML private MenuItem removeMenuItem;
-    @FXML private MenuItem groupMenuItem;
-    @FXML private MenuItem ungroupMenuItem;
-    @FXML private MenuItem propertiesMenuItem;
-    @FXML private TabPane workareaPane;
-
-    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
-        super.afterLoad(form, parameters, formNamespace);
-
-        stage.setTitle(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.title"));
-
-        loadWithConfigurationNode(configurationTreeRoot, configurationAccess.getConfiguration());
-
-        configurationTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        configurationTreeView.setCellFactory(CellFactories.treeCellFactory((cell, item, empty) -> cell.setText(empty || item == null ? null : item.getName())));
-        configurationTreeView.setOnEditCommit(editEvent -> configurationSaveEvent.fire(new ConfigurationSave()));
+    override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
+        super.afterLoad(form, parameters, formNamespace)
+        stage.title = bundle.getString("com.github.windchopper.tools.log.browser.main.title")
+        loadWithConfigurationNode(configurationTreeRoot, configurationAccess.configuration)
+        configurationTreeView.selectionModel.selectionMode = SelectionMode.MULTIPLE
+        configurationTreeView.cellFactory = CellFactories.treeCellFactory { cell: TreeCell<ConfigurationElement>, item: ConfigurationElement?, empty: Boolean -> cell.setText(if (empty || item == null) null else item.name) }
+        configurationTreeView.onEditCommit = EventHandler { editEvent: TreeView.EditEvent<ConfigurationElement>? -> configurationSaveEvent.fire(ConfigurationSave()) }
     }
 
-    private <T extends ConfigurationElement> void loadWithConfigurationNode(TreeItem<ConfigurationElement> item, T configurationNode) {
-        item.setValue(configurationNode);
-
-        if (configurationNode instanceof Group) {
-            Optional.ofNullable(((Group) configurationNode).getGroups())
-                .orElseGet(Collections::emptyList)
-                .forEach(group -> loadWithConfigurationNode(
-                    Pipeliner.of(TreeItem<ConfigurationElement>::new)
-                        .accept(groupItem -> item.getChildren().add(groupItem))
-                        .get(),
-                    group));
-
-            Optional.ofNullable(((Group) configurationNode).getConnections())
-                .orElseGet(Collections::emptyList)
-                .forEach(connection -> loadWithConfigurationNode(
-                    Pipeliner.of(TreeItem<ConfigurationElement>::new)
-                        .accept(connectionItem -> item.getChildren().add(connectionItem))
-                        .get(),
-                    connection));
-        }
-    }
-
-    void saveConfiguration(@Observes ConfigurationSave saveConfiguration) {
-        asyncRunner.runAsyncWithBusyPointer(stage, List.of(), () -> {
-            try {
-                configurationAccess.saveConfiguration();
-                configurationTreeView.refresh();
-            } catch (IOException | JAXBException thrown) {
-                errorLogAndAlert(thrown);
-            }
-        });
-    }
-
-    @FXML public void contextMenuShowing(WindowEvent event) {
-        ObservableList<TreeItem<ConfigurationElement>> selectedItems = configurationTreeView.getSelectionModel().getSelectedItems();
-
-        addGroupMenuItem.setDisable(1 != selectedItems.stream()
-            .map(TreeItem::getValue)
-            .filter(not(item -> item instanceof Connection))
-            .count());
-        addConnectionMenuItem.setDisable(1 != selectedItems.size());
-        removeMenuItem.setDisable(selectedItems.isEmpty() || selectedItems.stream()
-            .map(TreeItem::getValue)
-            .anyMatch(item -> item instanceof Configuration));
-        propertiesMenuItem.setDisable(1 != selectedItems.stream()
-            .map(TreeItem::getValue)
-            .filter(not(item -> item instanceof Configuration))
-            .count());
-    }
-
-    private void openWindow(Resource fxmlResource, String parameterName, Object parameter) {
-        asyncRunner.runAsyncWithBusyPointer(this.stage, List.of(propertiesMenuItem.disableProperty()), () -> formLoadEvent.fire(
-            new StageFormLoad(
-                fxmlResource,
-                Map.of(parameterName, parameter),
-                Builder.of(Stage::new)
-                    .set(stage -> stage::initOwner, this.stage)
-                    .set(stage -> stage::initModality, Modality.WINDOW_MODAL))));
-    }
-
-    private void openConnectionWindow(Connection connection) {
-        openWindow(new ClassPathResource(Globals.FXML__CONNECTION), "connection", connection);
-    }
-
-    private void openGroupWindow(Group group) {
-        openWindow(new ClassPathResource(Globals.FXML__GROUP), "group", group);
-    }
-
-    @FXML public void downloadSelected(ActionEvent event) {
-        formLoadEvent.fire(new TabFormLoad(
-            new ClassPathResource(Globals.FXML__DOWNLOAD),
-            Map.of("selection", List.copyOf(configurationTreeView.getSelectionModel().getSelectedItems())),
-            Pipeliner.of(Tab::new)
-                .set(tab -> tab::setText, String.format("%1$tF %1$tT", LocalDateTime.now()))
-                .accept(tab -> workareaPane.getTabs().add(tab))
-                .accept(tab -> workareaPane.getSelectionModel().select(tab))));
-    }
-
-    @FXML public void addGroupSelected(ActionEvent event) {
-        MultipleSelectionModel<TreeItem<ConfigurationElement>> selectionModel = configurationTreeView.getSelectionModel();
-        TreeItem<ConfigurationElement> parentItem = selectionModel.getSelectedItem();
-
-        if (parentItem.getValue() instanceof Group) {
-            Group group = ((Group) parentItem.getValue()).addGroup();
-            group.setName(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.newGroup"));
-
-            TreeItem<ConfigurationElement> connectionItem = new TreeItem<>();
-            connectionItem.setValue(group);
-
-            ObservableList<TreeItem<ConfigurationElement>> itemContainer = parentItem.getChildren();
-            int targetIndex = itemContainer.size();
-
-            for (int i = 0, count = itemContainer.size(); i < count; i++) {
-                if (itemContainer.get(i).getValue() instanceof Connection) {
-                    targetIndex = i;
-                    break;
+    private fun <T: ConfigurationElement?> loadWithConfigurationNode(item: TreeItem<ConfigurationElement>?, configurationNode: T) {
+        item!!.value = configurationNode
+        if (configurationNode is Group) {
+            with (configurationNode as Group) {
+                groups.forEach {
+                    loadWithConfigurationNode(
+                        TreeItem<ConfigurationElement>().also {
+                            item.children.add(it)
+                        },
+                        it)
+                }
+                connections.forEach {
+                    loadWithConfigurationNode(
+                        TreeItem<ConfigurationElement>().also {
+                            item.children.add(it)
+                        },
+                        it)
                 }
             }
-
-            itemContainer.add(targetIndex, connectionItem);
-            parentItem.setExpanded(true);
-
-            selectionModel.clearSelection();
-            selectionModel.select(connectionItem);
-
-            configurationSaveEvent.fire(new ConfigurationSave());
-
-            openGroupWindow(group);
         }
     }
 
-    @FXML public void addConnectionSelected(ActionEvent event) {
-        MultipleSelectionModel<TreeItem<ConfigurationElement>> selectionModel = configurationTreeView.getSelectionModel();
-        TreeItem<ConfigurationElement> parentItem = selectionModel.getSelectedItem();
-
-        if (parentItem.getValue() instanceof Group) {
-            Connection connection = ((Group) parentItem.getValue()).addConnection();
-            connection.setName(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.newConnection"));
-
-            TreeItem<ConfigurationElement> connectionItem = new TreeItem<>();
-            connectionItem.setValue(connection);
-
-            parentItem.getChildren().add(connectionItem);
-            parentItem.setExpanded(true);
-
-            selectionModel.clearSelection();
-            selectionModel.select(connectionItem);
-
-            configurationSaveEvent.fire(new ConfigurationSave());
-
-            openConnectionWindow(connection);
+    fun saveConfiguration(@Observes saveConfiguration: ConfigurationSave) {
+        GlobalScope.launch {
+            configurationAccess.saveConfiguration()
+            configurationTreeView.refresh()
         }
     }
 
-    @FXML public void propertiesSelected(ActionEvent event) {
-        TreeItem<ConfigurationElement> selectedItem = configurationTreeView.getSelectionModel().getSelectedItem();
+    @FXML fun contextMenuShowing(event: WindowEvent?) {
+        val selectedItems = configurationTreeView.selectionModel.selectedItems
+        addGroupMenuItem.isDisable = 1L != selectedItems.stream()
+            .map { obj: TreeItem<ConfigurationElement> -> obj.value }
+            .filter(Predicate.not { item: ConfigurationElement? -> item is Connection })
+            .count()
+        addConnectionMenuItem.isDisable = 1 != selectedItems.size
+        removeMenuItem.isDisable = selectedItems.isEmpty() || selectedItems.stream()
+            .map { obj: TreeItem<ConfigurationElement> -> obj.value }
+            .anyMatch { item: ConfigurationElement? -> item is Configuration }
+        propertiesMenuItem.isDisable = 1L != selectedItems.stream()
+            .map { obj: TreeItem<ConfigurationElement> -> obj.value }
+            .filter(Predicate.not { item: ConfigurationElement? -> item is Configuration })
+            .count()
+    }
 
-        if (selectedItem.getValue() instanceof Connection) {
-            openConnectionWindow((Connection) selectedItem.getValue());
-        } else if (selectedItem.getValue() instanceof Group) {
-            openGroupWindow((Group) selectedItem.getValue());
+    private fun openWindow(fxmlResource: Resource, parameterName: String, parameter: Any) {
+        launchWithWaitCursor(propertiesMenuItem.generalize()) {
+            formLoadEvent.fire(
+                StageFormLoad(fxmlResource, mapOf(parameterName to parameter)) {
+                    Stage().also {
+                        it.initOwner(stage)
+                        it.initModality(Modality.WINDOW_MODAL)
+                    }
+                })
         }
     }
 
-    @FXML public void removeSelected(ActionEvent event) {
-        List<TreeItem<ConfigurationElement>> selectedItems = new ArrayList<>(configurationTreeView.getSelectionModel().getSelectedItems());
-        configurationTreeView.getSelectionModel().clearSelection();
+    private fun openConnectionWindow(connection: Connection) {
+        openWindow(ClassPathResource(Globals.FXML__CONNECTION), "connection", connection)
+    }
 
-        while (selectedItems.size() > 0) {
-            List<TreeItem<ConfigurationElement>> copyOfSelectedItems = new ArrayList<>(selectedItems);
+    private fun openGroupWindow(group: Group) {
+        openWindow(ClassPathResource(Globals.FXML__GROUP), "group", group)
+    }
 
-            if (!selectedItems.removeIf(item -> item.getParent() == null || copyOfSelectedItems.contains(item.getParent()))) {
-                break;
+    @FXML fun downloadSelected(event: ActionEvent?) {
+        formLoadEvent.fire(TabFormLoad(
+            ClassPathResource(Globals.FXML__DOWNLOAD),
+            java.util.Map.of("selection", java.util.List.copyOf(configurationTreeView.selectionModel.selectedItems)),
+            Pipeliner.of { Tab() }
+                .set({ tab: Tab -> Consumer { value: String? -> tab.text = value } }, String.format("%1\$tF %1\$tT", LocalDateTime.now()))
+                .accept { tab: Tab? -> workareaPane.tabs.add(tab) }
+                .accept { tab: Tab? -> workareaPane.selectionModel.select(tab) }))
+    }
+
+    @FXML fun addGroupSelected(event: ActionEvent?) {
+        val selectionModel = configurationTreeView.selectionModel
+        val parentItem = selectionModel.selectedItem
+        if (parentItem.value is Group) {
+            val group = (parentItem.value as Group).addGroup()
+            group.name = bundle.getString("com.github.windchopper.tools.log.browser.main.newGroup")
+            val connectionItem = TreeItem<ConfigurationElement>()
+            connectionItem.value = group
+            val itemContainer = parentItem.children
+            var targetIndex = itemContainer.size
+            var i = 0
+            val count = itemContainer.size
+            while (i < count) {
+                if (itemContainer[i].value is Connection) {
+                    targetIndex = i
+                    break
+                }
+                i++
+            }
+            itemContainer.add(targetIndex, connectionItem)
+            parentItem.isExpanded = true
+            selectionModel.clearSelection()
+            selectionModel.select(connectionItem)
+            configurationSaveEvent.fire(ConfigurationSave())
+            openGroupWindow(group)
+        }
+    }
+
+    @FXML fun addConnectionSelected(event: ActionEvent?) {
+        val selectionModel = configurationTreeView.selectionModel
+        val parentItem = selectionModel.selectedItem
+        if (parentItem.value is Group) {
+            val connection = (parentItem.value as Group).addConnection()
+            connection.name = bundle.getString("com.github.windchopper.tools.log.browser.main.newConnection")
+            val connectionItem = TreeItem<ConfigurationElement>()
+            connectionItem.value = connection
+            parentItem.children.add(connectionItem)
+            parentItem.isExpanded = true
+            selectionModel.clearSelection()
+            selectionModel.select(connectionItem)
+            configurationSaveEvent.fire(ConfigurationSave())
+            openConnectionWindow(connection)
+        }
+    }
+
+    @FXML fun propertiesSelected(event: ActionEvent?) {
+        val selectedItem = configurationTreeView.selectionModel.selectedItem
+        if (selectedItem.value is Connection) {
+            openConnectionWindow(selectedItem.value as Connection)
+        } else if (selectedItem.value is Group) {
+            openGroupWindow(selectedItem.value as Group)
+        }
+    }
+
+    @FXML fun removeSelected(event: ActionEvent?) {
+        val selectedItems: MutableList<TreeItem<ConfigurationElement>> = ArrayList(configurationTreeView.selectionModel.selectedItems)
+        configurationTreeView.selectionModel.clearSelection()
+        while (selectedItems.size > 0) {
+            val copyOfSelectedItems: List<TreeItem<ConfigurationElement>> = ArrayList(selectedItems)
+            if (!selectedItems.removeIf { item: TreeItem<ConfigurationElement> -> item.parent == null || copyOfSelectedItems.contains(item.parent) }) {
+                break
             }
         }
-
-        for (TreeItem<ConfigurationElement> item : selectedItems) {
-            TreeItem<ConfigurationElement> parentItem = item.getParent();
-            Group parentGroup = (Group) parentItem.getValue();
-
-            ConfigurationElement configurationElement = item.getValue();
-            parentItem.getChildren().remove(item);
-
-            if (configurationElement instanceof Connection) {
-                parentGroup.getConnections().remove(configurationElement);
-            } else if (configurationElement instanceof Group) {
-                parentGroup.getGroups().remove(configurationElement);
+        for (item in selectedItems) {
+            val parentItem = item.parent
+            val parentGroup = parentItem.value as Group
+            val configurationElement = item.value
+            parentItem.children.remove(item)
+            if (configurationElement is Connection) {
+                parentGroup.connections.remove(configurationElement)
+            } else if (configurationElement is Group) {
+                parentGroup.groups.remove(configurationElement)
             }
         }
-
-        configurationSaveEvent.fire(new ConfigurationSave());
+        configurationSaveEvent.fire(ConfigurationSave())
     }
 
-    @FXML public void groupSelected(ActionEvent event) {
-
+    @FXML fun groupSelected(event: ActionEvent) {
     }
 
-    @FXML public void ungroupSelected(ActionEvent event) {
-
+    @FXML fun ungroupSelected(event: ActionEvent) {
     }
 
 }

@@ -1,11 +1,12 @@
-package com.github.windchopper.tools.log.browser.preferences;
+package com.github.windchopper.tools.log.browser.preferences
 
-import com.github.windchopper.common.preferences.types.FlatType;
+import com.github.windchopper.common.preferences.types.FlatType
+import java.util.*
 
-public class CharArrayType extends FlatType<char[]> {
+class CharArrayType: FlatType<CharArray>(
+    { it.toCharArray() },
+    { String(it) })
 
-    public CharArrayType() {
-        super(String::toCharArray, String::new);
-    }
-
-}
+class ByteArrayType: FlatType<ByteArray>(
+    { Base64.getDecoder().decode(it) },
+    { Base64.getEncoder().encodeToString(it) })

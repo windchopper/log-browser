@@ -1,63 +1,38 @@
-package com.github.windchopper.tools.log.browser.fx;
+package com.github.windchopper.tools.log.browser.fx
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TreeView;
-import org.apache.commons.lang3.StringUtils;
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.value.ObservableValue
+import javafx.scene.control.ListView
+import javafx.scene.control.TreeView
+import org.apache.commons.lang3.StringUtils
+import java.nio.file.Files
+import java.nio.file.Path
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
+@Suppress("UNUSED_PARAMETER", "UNUSED_ANONYMOUS_PARAMETER") class RemoteFile(val path: Path): Comparable<RemoteFile> {
 
-public class RemoteFile implements Comparable<RemoteFile> {
+    val directory: Boolean
+        get() = Files.isDirectory(path)
 
-    private Path path;
-    private boolean selected;
-
-    public RemoteFile(Path path) {
-        this.path = path;
+    override fun compareTo(other: RemoteFile): Int {
+        return path.compareTo(other.path)
     }
 
-    public boolean isDirectory() {
-        return Files.isDirectory(path);
-    }
-
-    public Path getPath() {
-        return path;
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    @Override public int compareTo(RemoteFile anotherFile) {
-        return path.compareTo(anotherFile.path);
-    }
-
-    public String displayName(boolean appendDirectoryNameWithSlash) {
-        String displayName = StringUtils.defaultString(StringUtils.trimToNull(StringUtils.substringAfterLast(path.toString(), "/")), "/");
-
-        if (Files.isDirectory(path) && appendDirectoryNameWithSlash) {
-            displayName += "/";
+    fun displayName(appendDirectoryNameWithSlash: Boolean): String {
+        var displayName = StringUtils.defaultString(StringUtils.trimToNull(StringUtils.substringAfterLast(path.toString(), "/")), "/")
+        if (directory && appendDirectoryNameWithSlash) {
+            displayName += "/"
         }
-
-        return displayName;
+        return displayName
     }
 
-    public BooleanProperty createSelectedProperty(Map<String, BooleanProperty> selectedStateBuffer, TreeView<?> treeView, ListView<?> listView) {
-        BooleanProperty selectedProperty = selectedStateBuffer.computeIfAbsent(path.toString(), missingPath -> new SimpleBooleanProperty(this, "selected"));
-
-        selectedProperty.addListener((observable, oldValue, newValue) -> {
-            treeView.refresh();
-            listView.refresh();
-        });
-
-        return selectedProperty;
+    fun createSelectedProperty(selectedStateBuffer: MutableMap<String, BooleanProperty>, treeView: TreeView<*>, listView: ListView<*>): BooleanProperty {
+        val selectedProperty = selectedStateBuffer.computeIfAbsent(path.toString()) { SimpleBooleanProperty(this, "selected") }
+        selectedProperty.addListener { observable: ObservableValue<out Boolean?>?, oldValue: Boolean?, newValue: Boolean? ->
+            treeView.refresh()
+            listView.refresh()
+        }
+        return selectedProperty
     }
 
 }

@@ -10,6 +10,10 @@ module windchopper.tools.log.browser {
     requires java.prefs;
     requires java.annotation;
     requires java.xml.bind;
+    requires kotlin.stdlib;
+    requires kotlin.reflect;
+    requires kotlinx.coroutines.core;
+    requires kotlinx.coroutines.javafx;
     requires javafx.controls;
     requires javafx.fxml;
     requires jakarta.inject.api;

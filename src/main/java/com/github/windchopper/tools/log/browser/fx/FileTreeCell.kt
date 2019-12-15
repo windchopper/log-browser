@@ -1,65 +1,50 @@
-package com.github.windchopper.tools.log.browser.fx;
+package com.github.windchopper.tools.log.browser.fx
 
-import com.github.windchopper.common.util.Pipeliner;
-import javafx.beans.property.BooleanProperty;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.util.Callback;
-import org.apache.commons.lang3.StringUtils;
+import com.github.windchopper.common.util.Pipeliner
+import javafx.beans.property.BooleanProperty
+import javafx.scene.control.CheckBox
+import javafx.scene.control.TreeCell
+import javafx.scene.control.TreeItem
+import javafx.util.Callback
+import org.apache.commons.lang3.StringUtils
+import java.util.function.Consumer
 
-import java.util.Map;
+class FileTreeCell(
+    private val selectedStateCallback: (TreeItem<RemoteFile>) -> BooleanProperty,
+    private val selectedStateBuffer: Map<String, BooleanProperty>): TreeCell<RemoteFile>() {
+    private val checkBox: CheckBox
+    private var booleanProperty: BooleanProperty? = null
 
-public class FileTreeCell extends TreeCell<RemoteFile> {
-
-    private final CheckBox checkBox;
-    private BooleanProperty booleanProperty;
-    private Callback<TreeItem<RemoteFile>, BooleanProperty> selectedStateCallback;
-    private Map<String, BooleanProperty> selectedStateBuffer;
-
-    public FileTreeCell(
-        Callback<TreeItem<RemoteFile>, BooleanProperty> selectedStateCallback,
-        Map<String, BooleanProperty> selectedStateBuffer) {
-
-        this.selectedStateCallback = selectedStateCallback;
-        this.selectedStateBuffer = selectedStateBuffer;
-
-        getStyleClass().add("check-box-tree-cell");
-
-        checkBox = Pipeliner.of(CheckBox::new)
-            .set(bean -> bean::setFocusTraversable, false)
-            .set(bean -> bean::setAllowIndeterminate, false)
-            .get();
-
-        setGraphic(null);
+    override fun updateItem(file: RemoteFile?, empty: Boolean) {
+        super.updateItem(file, empty)
+        if (empty) {
+            text = null
+            graphic = null
+        } else {
+            val treeItem = treeItem
+            text = if (treeItem == null) "" else treeItem.value!!.displayName(false)
+            checkBox.graphic = treeItem?.graphic
+            graphic = checkBox
+            if (booleanProperty != null) {
+                checkBox.selectedProperty().unbindBidirectional(booleanProperty)
+            }
+            booleanProperty = selectedStateCallback(treeItem)
+            if (booleanProperty != null) {
+                checkBox.selectedProperty().bindBidirectional(booleanProperty)
+            }
+            checkBox.isVisible = file?.directory?:false
+            checkBox.isIndeterminate = file != null && !checkBox.isSelected && selectedStateBuffer.entries.stream()
+                .anyMatch { entry: Map.Entry<String, BooleanProperty> -> entry.value.get() && StringUtils.startsWith(entry.key, file.path.toString()) }
+        }
     }
 
-    @Override public void updateItem(RemoteFile file, boolean empty) {
-        super.updateItem(file, empty);
-
-        if (empty) {
-            setText(null);
-            setGraphic(null);
-        } else {
-            TreeItem<RemoteFile> treeItem = getTreeItem();
-            setText(treeItem == null ? "" : treeItem.getValue().displayName(false));
-            checkBox.setGraphic(treeItem == null ? null : treeItem.getGraphic());
-            setGraphic(checkBox);
-
-            if (booleanProperty != null) {
-                checkBox.selectedProperty().unbindBidirectional(booleanProperty);
-            }
-
-            booleanProperty = selectedStateCallback.call(treeItem);
-
-            if (booleanProperty != null) {
-                checkBox.selectedProperty().bindBidirectional(booleanProperty);
-            }
-
-            checkBox.setVisible(file != null && file.isDirectory());
-            checkBox.setIndeterminate(file != null && !checkBox.isSelected() && selectedStateBuffer.entrySet().stream()
-                .anyMatch(entry -> entry.getValue().get() && StringUtils.startsWith(entry.getKey(), file.getPath().toString())));
-        }
+    init {
+        styleClass.add("check-box-tree-cell")
+        checkBox = Pipeliner.of { CheckBox() }
+            .set({ bean: CheckBox -> Consumer { value: Boolean? -> bean.isFocusTraversable = value!! } }, false)
+            .set({ bean: CheckBox -> Consumer { value: Boolean? -> bean.isAllowIndeterminate = value!! } }, false)
+            .get()
+        graphic = null
     }
 
 }

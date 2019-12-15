@@ -1,59 +1,72 @@
-package com.github.windchopper.tools.log.browser;
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.fx.dialog.OptionDialog;
-import com.github.windchopper.common.fx.dialog.OptionDialogModel;
-import com.github.windchopper.common.fx.cdi.form.StageFormController;
-import javafx.scene.Parent;
-import javafx.scene.image.Image;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.github.windchopper.common.fx.cdi.form.FormController
+import com.github.windchopper.common.fx.cdi.form.StageFormController
+import com.github.windchopper.common.fx.dialog.OptionDialog
+import com.github.windchopper.common.fx.dialog.OptionDialogModel
+import javafx.scene.Cursor
+import javafx.scene.Parent
+import javafx.stage.Modality
+import javafx.stage.Stage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
+import org.apache.commons.lang3.exception.ExceptionUtils
+import java.util.logging.Level
 
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+abstract class BaseStageController: StageFormController() {
 
-abstract class BaseStageController extends StageFormController implements FormControllerRoutines {
-
-    private static final Image iconImage = new Image("/com/github/windchopper/tools/log/browser/images/scroll-48.png");
-
-    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> formNamespace) {
-        super.afterLoad(form, parameters, formNamespace);
-        stage.getIcons().add(iconImage);
+    override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
+        super.afterLoad(form, parameters, formNamespace)
+        stage.icons.add(Globals.logoImage)
     }
 
-    private void alert(OptionDialog.Type alertType, String message) {
-        runWithFxThread(() -> OptionDialog.showOptionDialog(message, alertType, List.of(OptionDialogModel.Option.OK),
-            prepareStageDialogFrame(iconImage, Modality.WINDOW_MODAL, false)));
-    }
-
-    void informationAlert(String message) {
-        alert(OptionDialog.Type.INFORMATION, message);
-    }
-
-    void errorAlert(String message) {
-        alert(OptionDialog.Type.ERROR, message);
-    }
-
-    void errorLogAndAlert(Exception exception) {
-        String errorMessage = ExceptionUtils.getRootCauseMessage(exception);
-        logger.log(Level.SEVERE, errorMessage, exception);
-        errorAlert(errorMessage);
-    }
-
-    private Stage topLevelStage(Stage currentStage) {
-        Stage topLevelStageCandidate = Stage.getWindows().stream()
-            .filter(Stage.class::isInstance)
-            .map(Stage.class::cast)
-            .filter(stage -> stage.getOwner() == currentStage)
-            .findFirst()
-            .orElse(null);
-
-        if (topLevelStageCandidate != null) {
-            return topLevelStage(topLevelStageCandidate);
+    private fun alert(alertType: OptionDialog.Type, message: String) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
+            OptionDialog.showOptionDialog(message, alertType, listOf(OptionDialogModel.Option.OK),
+                prepareStageDialogFrame(Globals.logoImage, Modality.WINDOW_MODAL, false))
         }
+    }
 
-        return currentStage;
+    fun informationAlert(message: String) {
+        alert(OptionDialog.Type.INFORMATION, message)
+    }
+
+    fun errorAlert(message: String) {
+        alert(OptionDialog.Type.ERROR, message)
+    }
+
+    fun errorLogAndAlert(exception: Exception?) {
+        val errorMessage = ExceptionUtils.getRootCauseMessage(exception)
+        FormController.logger.log(Level.SEVERE, errorMessage, exception)
+        errorAlert(errorMessage)
+    }
+
+    private fun topLevelStage(currentStage: Stage): Stage {
+        val topLevelStageCandidate = Stage.getWindows()
+            .filterIsInstance<Stage>()
+            .firstOrNull { it.owner === currentStage }
+
+        return topLevelStageCandidate
+            ?.let { topLevelStage(it) }
+            ?:currentStage
+    }
+
+    fun launchWithWaitCursor(vararg disableNodes: NodeOrMenuItem, action: () -> Unit) {
+        stage.scene.cursor = Cursor.WAIT
+        disableNodes.forEach { it.disabled = true }
+
+        GlobalScope.launch {
+            try {
+                action()
+            } catch (thrown: Exception) {
+                errorLogAndAlert(thrown)
+            } finally {
+                disableNodes.forEach { it.disabled = false }
+                stage.scene.cursor = Cursor.DEFAULT
+            }
+        }
     }
 
 }

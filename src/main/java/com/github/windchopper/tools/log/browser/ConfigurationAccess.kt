@@ -1,84 +1,71 @@
-package com.github.windchopper.tools.log.browser;
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.util.Pipeliner;
-import com.github.windchopper.tools.log.browser.configuration.Configuration;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.github.windchopper.common.util.Pipeliner
+import com.github.windchopper.tools.log.browser.configuration.Configuration
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.exception.ExceptionUtils
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.util.*
+import java.util.logging.Level
+import java.util.logging.Logger
+import javax.annotation.PostConstruct
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Named
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.JAXBException
+import javax.xml.bind.Marshaller
+import javax.xml.bind.PropertyException
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+@ApplicationScoped @Named("ConfigurationAccess") class ConfigurationAccess {
 
-@ApplicationScoped @Named("ConfigurationAccess") public class ConfigurationAccess {
+    private val logger = Logger.getLogger(this::class.qualifiedName)
+    private var marshaller: Marshaller? = null
+    private var configurationFile: Path? = null
 
-    private static final Logger logger = Logger.getLogger(ConfigurationAccess.class.getName());
+    var configuration: Configuration? = null
 
-    private Marshaller marshaller;
-
-    private Path configurationFile;
-    private Configuration configuration;
-
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-    @PostConstruct private void afterConstruction() {
+    @PostConstruct
+    private fun afterConstruction() {
         try {
             configurationFile = Paths.get(Optional.ofNullable(System.getProperty("user.home"))
                 .orElse(""))
                 .resolve(".log-browser")
-                .resolve("configuration.xml");
-
+                .resolve("configuration.xml")
             try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
-
+                val jaxbContext = JAXBContext.newInstance(Configuration::class.java)
                 marshaller = Pipeliner.of(jaxbContext)
-                    .mapFailable(JAXBContext::createMarshaller)
-                    .acceptFailable(marshaller -> marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true))
-                    .get();
-
-                try (Reader reader = Files.newBufferedReader(configurationFile)) {
-                    configuration = (Configuration) jaxbContext
+                    .mapFailable<Marshaller, JAXBException> { obj: JAXBContext -> obj.createMarshaller() }
+                    .acceptFailable<PropertyException> { marshaller: Marshaller -> marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true) }
+                    .get()
+                Files.newBufferedReader(configurationFile).use { reader ->
+                    configuration = jaxbContext
                         .createUnmarshaller()
-                        .unmarshal(reader);
+                        .unmarshal(reader) as Configuration
                 }
-            } catch (IOException thrown) {
-                logger.log(Level.WARNING, ExceptionUtils.getRootCauseMessage(thrown), thrown);
-                configuration = new Configuration();
+            } catch (thrown: IOException) {
+                logger.log(Level.WARNING, ExceptionUtils.getRootCauseMessage(thrown), thrown)
+                configuration = Configuration()
             }
-
-            if (StringUtils.isBlank(configuration.getName())) {
-                configuration.setName(Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration"));
+            if (StringUtils.isBlank(configuration!!.name)) {
+                configuration!!.name = Globals.bundle.getString("com.github.windchopper.tools.log.browser.main.newConfiguration")
             }
-        } catch (Exception thrown) {
-            throw new IllegalStateException(thrown);
+        } catch (thrown: Exception) {
+            throw IllegalStateException(thrown)
         }
     }
 
-    void saveConfiguration() throws IOException, JAXBException {
-        Path tempFile = Files.createTempFile("save-conf-temp-", ".xml");
-
-        try (Writer writer = Files.newBufferedWriter(tempFile)) {
-            marshaller.marshal(configuration, writer);
-        }
-
+    @Throws(IOException::class, JAXBException::class)
+    fun saveConfiguration() {
+        val tempFile = Files.createTempFile("save-conf-temp-", ".xml")
+        Files.newBufferedWriter(tempFile).use { writer -> marshaller!!.marshal(configuration, writer) }
         Files.move(
             tempFile,
-            Files.createDirectories(configurationFile.getParent()).resolve(configurationFile.getFileName()),
-            StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(configurationFile!!.parent).resolve(configurationFile!!.fileName),
+            StandardCopyOption.REPLACE_EXISTING)
     }
 
 }

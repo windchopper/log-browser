@@ -1,188 +1,164 @@
-package com.github.windchopper.tools.log.browser;
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.fx.cdi.form.Form;
-import com.github.windchopper.tools.log.browser.events.PathListConfirm;
-import com.github.windchopper.tools.log.browser.fx.FileListCell;
-import com.github.windchopper.tools.log.browser.fx.FileTreeCell;
-import com.github.windchopper.tools.log.browser.fx.RemoteFile;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.github.windchopper.common.fx.cdi.form.Form
+import com.github.windchopper.common.fx.cdi.form.FormController
+import com.github.windchopper.tools.log.browser.events.PathListConfirm
+import com.github.windchopper.tools.log.browser.fx.FileListCell
+import com.github.windchopper.tools.log.browser.fx.FileTreeCell
+import com.github.windchopper.tools.log.browser.fx.RemoteFile
+import com.github.windchopper.tools.log.browser.util.generalize
+import javafx.application.Platform
+import javafx.beans.property.BooleanProperty
+import javafx.beans.value.ObservableValue
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
+import javafx.fxml.FXML
+import javafx.scene.Parent
+import javafx.scene.control.*
+import javafx.scene.input.MouseEvent
+import javafx.stage.WindowEvent
+import javafx.util.Callback
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.exception.ExceptionUtils
+import java.io.IOException
+import java.nio.file.FileSystem
+import java.nio.file.Files
+import java.util.*
+import java.util.logging.Level
+import javax.annotation.PreDestroy
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.event.Event
+import javax.inject.Inject
+import javax.inject.Named
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.stream.StreamSupport;
+@ApplicationScoped @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") @Suppress("UNUSED_PARAMETER") class BrowseStageController: BaseStageController() {
 
-import static java.util.stream.Collectors.toList;
+    @Inject private lateinit var confirmPathListEvent: Event<PathListConfirm>
+    @FXML private lateinit var pathField: TextField
+    @FXML private lateinit var directoryTreeView: TreeView<RemoteFile>
+    @FXML private lateinit var fileListView: ListView<RemoteFile>
 
-@ApplicationScoped @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") public class BrowseStageController extends BaseStageController {
+    private var fileSystem: FileSystem? = null
+    private val directoryTreeRoot = TreeItem<RemoteFile>()
+    private val selectedStateBuffer: MutableMap<String, BooleanProperty> = HashMap()
 
-    @Inject private Event<PathListConfirm> confirmPathListEvent;
-    @Inject private AsyncRunner asyncRunner;
-
-    @FXML private TextField pathField;
-    @FXML private TreeView<RemoteFile> directoryTreeView;
-    @FXML private ListView<RemoteFile> fileListView;
-
-    private FileSystem fileSystem;
-
-    private TreeItem<RemoteFile> directoryTreeRoot = new TreeItem<>();
-    private final Map<String, BooleanProperty> selectedStateBuffer = new HashMap<>();
-
-    boolean loadTree(RemoteFile selectedFile, List<TreeItem<RemoteFile>> directoryItems, List<RemoteFile> files) {
-        try {
-            Files.list(selectedFile.getPath())
+    fun loadTree(selectedFile: RemoteFile, directoryItems: MutableList<TreeItem<RemoteFile?>?>, files: MutableList<RemoteFile?>): Boolean {
+        return try {
+            Files.list(selectedFile.path)
                 .sorted()
-                .map(RemoteFile::new)
-                .peek(files::add)
-                .filter(RemoteFile::isDirectory)
-                .map(TreeItem::new)
-                .forEach(directoryItems::add);
-            return true;
-        } catch (IOException thrown) {
-            errorLogAndAlert(thrown);
-            return false;
+                .map { RemoteFile(it) }
+                .peek { files.add(it) }
+                .filter { it.directory }
+                .map { TreeItem(it) }
+                .forEach { directoryItems.add(it) }
+            true
+        } catch (thrown: IOException) {
+            errorLogAndAlert(thrown)
+            false
         }
     }
 
-    @Override protected void afterLoad(Parent form, Map<String, ?> parameters, Map<String, ?> fxmlLoaderNamespace) {
-        super.afterLoad(form, parameters, fxmlLoaderNamespace);
-
-        stage.setOnCloseRequest(event -> closeFileSystem());
-
-        fileSystem = (FileSystem) parameters.get("fileSystem");
-
-        directoryTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        directoryTreeView.setCellFactory(view -> new FileTreeCell(
-            item -> item.getValue().createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView),
-            selectedStateBuffer));
-
-        directoryTreeView.getSelectionModel().selectedItemProperty().addListener((observable, unselectedItem, selectedItem) -> {
+    override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
+        super.afterLoad(form, parameters, formNamespace)
+        stage.onCloseRequest = EventHandler { event: WindowEvent? -> closeFileSystem() }
+        fileSystem = parameters["fileSystem"] as FileSystem?
+        directoryTreeView.selectionModel.selectionMode = SelectionMode.SINGLE
+        directoryTreeView.setCellFactory { view: TreeView<RemoteFile> ->
+            FileTreeCell(
+                { item: TreeItem<RemoteFile> -> item.value.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) },
+                selectedStateBuffer)
+        }
+        directoryTreeView.selectionModel.selectedItemProperty().addListener { observable: ObservableValue<out TreeItem<RemoteFile>?>?, unselectedItem: TreeItem<RemoteFile>?, selectedItem: TreeItem<RemoteFile>? ->
             if (fileSystem == null || selectedItem == null) {
-                return;
+                return@addListener
             }
-
-            RemoteFile selectedFile = selectedItem.getValue();
-            pathField.setText(selectedFile.getPath().toString());
-
-            selectedItem.getChildren().clear();
-            fileListView.getItems().clear();
-
-            asyncRunner.runAsyncWithBusyPointer(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
-                List<TreeItem<RemoteFile>> directoryItems = new ArrayList<>();
-                List<RemoteFile> files = new ArrayList<>();
-
+            val selectedFile = selectedItem.value
+            pathField.text = selectedFile.path.toString()
+            selectedItem.children.clear()
+            fileListView.items.clear()
+            launchWithWaitCursor(pathField.generalize(), directoryTreeView.generalize(), fileListView.generalize()) {
+                val directoryItems: MutableList<TreeItem<RemoteFile?>?> = ArrayList()
+                val files: MutableList<RemoteFile?> = ArrayList()
                 if (loadTree(selectedFile, directoryItems, files)) {
-                    Platform.runLater(() -> {
-                        fileListView.getItems().addAll(files);
-                        selectedItem.getChildren().addAll(directoryItems);
-                        selectedItem.setExpanded(true);
-                    });
-                }
-            });
-        });
-
-        fileListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        fileListView.setCellFactory(view -> new FileListCell(
-            file -> file.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView),
-            selectedStateBuffer));
-
-        fileListView.setOnMouseClicked(event -> {
-            RemoteFile selectedFile = fileListView.getSelectionModel().getSelectedItem();
-
-            if (selectedFile != null && selectedFile.isDirectory() && event.getClickCount() > 1) {
-                directoryTreeView.getSelectionModel().clearSelection();
-                fileListView.getItems().clear();
-
-                String path = selectedFile.getPath().normalize().toString();
-                pathField.setText(path);
-
-                TreeItem<RemoteFile> treeItem = findTreeItemByPath(directoryTreeView.getRoot(), path);
-
-                if (treeItem != null) {
-                    treeItem.getChildren().clear();
-                }
-
-                asyncRunner.runAsyncWithBusyPointer(stage, List.of(pathField.disableProperty(), directoryTreeView.disableProperty(), fileListView.disableProperty()), () -> {
-                    List<TreeItem<RemoteFile>> directoryItems = new ArrayList<>();
-                    List<RemoteFile> files = new ArrayList<>();
-
-                    if (loadTree(selectedFile, directoryItems, files)) {
-                        Platform.runLater(() -> {
-                            fileListView.getItems().addAll(files);
-
-                            if (treeItem != null) {
-                                treeItem.getChildren().addAll(directoryItems);
-
-                                for (TreeItem<RemoteFile> item = treeItem; item != null; item = item.getParent()) {
-                                    item.setExpanded(true);
-                                }
-
-                                directoryTreeView.scrollTo(directoryTreeView.getRow(treeItem));
-                                directoryTreeView.getSelectionModel().select(treeItem);
-                            }
-                        });
+                    Platform.runLater {
+                        fileListView.items.addAll(files)
+                        selectedItem.children.addAll(directoryItems)
+                        selectedItem.setExpanded(true)
                     }
-                });
+                }
             }
-        });
-
-        directoryTreeView.setRoot(directoryTreeRoot);
-
-        StreamSupport.stream(fileSystem.getRootDirectories().spliterator(), false)
+        }
+        fileListView.selectionModel.selectionMode = SelectionMode.SINGLE
+        fileListView.setCellFactory { view: ListView<RemoteFile>? ->
+            FileListCell(
+                Callback { file: RemoteFile -> file.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) },
+                selectedStateBuffer)
+        }
+        fileListView.onMouseClicked = EventHandler { event: MouseEvent ->
+            val selectedFile = fileListView.selectionModel.selectedItem
+            if (selectedFile != null && selectedFile.directory && event.clickCount > 1) {
+                directoryTreeView.selectionModel.clearSelection()
+                fileListView.items.clear()
+                val path = selectedFile.path.normalize().toString()
+                pathField.text = path
+                val treeItem = findTreeItemByPath(directoryTreeView.root, path)
+                treeItem?.children?.clear()
+                launchWithWaitCursor(pathField.generalize(), directoryTreeView.generalize(), fileListView.generalize()) {
+                    val directoryItems: MutableList<TreeItem<RemoteFile?>?> = ArrayList()
+                    val files: MutableList<RemoteFile?> = ArrayList()
+                    if (loadTree(selectedFile, directoryItems, files)) {
+                        Platform.runLater {
+                            fileListView.items.addAll(files)
+                            if (treeItem != null) {
+                                treeItem.children.addAll(directoryItems)
+                                var item = treeItem
+                                while (item != null) {
+                                    item.isExpanded = true
+                                    item = item.parent
+                                }
+                                directoryTreeView.scrollTo(directoryTreeView.getRow(treeItem))
+                                directoryTreeView.selectionModel.select(treeItem)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        directoryTreeView.setRoot(directoryTreeRoot)
+        fileSystem!!.rootDirectories
             .sorted()
-            .map(RemoteFile::new)
-            .map(TreeItem::new)
-            .forEach(item -> directoryTreeRoot.getChildren().add(item));
+            .map { RemoteFile(it) }
+            .map { TreeItem(it) }
+            .forEach { directoryTreeRoot.children.add(it) }
     }
 
-    @PreDestroy void closeFileSystem() {
+    @PreDestroy fun closeFileSystem() {
         if (fileSystem != null) {
             try {
-                fileSystem.close();
-            } catch (IOException thrown) {
-                logger.log(Level.SEVERE, ExceptionUtils.getRootCauseMessage(thrown), thrown);
+                fileSystem!!.close()
+            } catch (thrown: IOException) {
+                FormController.logger.log(Level.SEVERE, ExceptionUtils.getRootCauseMessage(thrown), thrown)
             }
         }
     }
 
-    private TreeItem<RemoteFile> findTreeItemByPath(TreeItem<RemoteFile> item, String path) {
-        if (StringUtils.equals(item.getValue().getPath().toString(), path)) {
-            return item;
+    private fun findTreeItemByPath(item: TreeItem<RemoteFile>, path: String): TreeItem<RemoteFile>? {
+        if (StringUtils.equals(item.value.path.toString(), path)) {
+            return item
         }
-
-        for (TreeItem<RemoteFile> childItem : item.getChildren()) {
-            if (StringUtils.startsWith(path, childItem.getValue().getPath().toString())) {
-                return findTreeItemByPath(childItem, path);
+        for (childItem in item.children) {
+            if (StringUtils.startsWith(path, childItem.value.path.toString())) {
+                return findTreeItemByPath(childItem, path)
             }
         }
-
-        return null;
+        return null
     }
 
-    @FXML public void confirmPressed(ActionEvent event) {
-        stage.close();
-        confirmPathListEvent.fire(new PathListConfirm(selectedStateBuffer.entrySet().stream()
-            .filter(entry -> entry.getValue().get())
-            .map(Entry::getKey)
-            .collect(toList())));
+    @FXML fun confirmPressed(event: ActionEvent) {
+        stage.close()
+        confirmPathListEvent.fire(PathListConfirm(selectedStateBuffer.entries
+            .filter { it.value.get() }
+            .map { it.key }))
     }
 
 }
