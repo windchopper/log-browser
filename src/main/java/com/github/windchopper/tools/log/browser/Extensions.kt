@@ -1,6 +1,5 @@
-package com.github.windchopper.tools.log.browser.util
+package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.tools.log.browser.NodeOrMenuItem
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.Node

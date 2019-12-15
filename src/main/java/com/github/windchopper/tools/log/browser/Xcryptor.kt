@@ -1,7 +1,6 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.preferences.PreferencesEntry
-import com.github.windchopper.tools.log.browser.preferences.ByteArrayType
 import java.security.GeneralSecurityException
 import java.security.SecureRandom
 import java.util.*

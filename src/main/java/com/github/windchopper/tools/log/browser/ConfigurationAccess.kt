@@ -1,7 +1,6 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.util.Pipeliner
-import com.github.windchopper.tools.log.browser.configuration.Configuration
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.IOException

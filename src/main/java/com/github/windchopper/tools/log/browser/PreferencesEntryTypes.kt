@@ -1,4 +1,4 @@
-package com.github.windchopper.tools.log.browser.preferences
+package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.preferences.types.FlatType
 import java.util.*

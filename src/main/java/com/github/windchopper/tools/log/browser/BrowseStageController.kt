@@ -6,7 +6,6 @@ import com.github.windchopper.tools.log.browser.events.PathListConfirm
 import com.github.windchopper.tools.log.browser.fx.FileListCell
 import com.github.windchopper.tools.log.browser.fx.FileTreeCell
 import com.github.windchopper.tools.log.browser.fx.RemoteFile
-import com.github.windchopper.tools.log.browser.util.generalize
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.value.ObservableValue
