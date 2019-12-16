@@ -12,6 +12,7 @@ import java.util.function.Consumer
 class FileTreeCell(
     private val selectedStateCallback: (TreeItem<RemoteFile>) -> BooleanProperty,
     private val selectedStateBuffer: Map<String, BooleanProperty>): TreeCell<RemoteFile>() {
+
     private val checkBox: CheckBox
     private var booleanProperty: BooleanProperty? = null
 

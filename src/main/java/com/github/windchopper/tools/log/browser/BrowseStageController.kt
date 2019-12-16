@@ -2,7 +2,6 @@ package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.fx.cdi.form.Form
 import com.github.windchopper.common.fx.cdi.form.FormController
-import com.github.windchopper.tools.log.browser.events.PathListConfirm
 import com.github.windchopper.tools.log.browser.fx.FileListCell
 import com.github.windchopper.tools.log.browser.fx.FileTreeCell
 import com.github.windchopper.tools.log.browser.fx.RemoteFile
@@ -26,13 +25,15 @@ import java.util.*
 import java.util.logging.Level
 import javax.annotation.PreDestroy
 import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.context.Dependent
 import javax.enterprise.event.Event
 import javax.inject.Inject
 import javax.inject.Named
 
-@ApplicationScoped @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") @Suppress("UNUSED_PARAMETER") class BrowseStageController: BaseStageController() {
+@Dependent @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") @Suppress("UNUSED_PARAMETER") class BrowseStageController: BaseStageController() {
 
     @Inject private lateinit var confirmPathListEvent: Event<PathListConfirm>
+
     @FXML private lateinit var pathField: TextField
     @FXML private lateinit var directoryTreeView: TreeView<RemoteFile>
     @FXML private lateinit var fileListView: ListView<RemoteFile>
@@ -62,20 +63,18 @@ import javax.inject.Named
         stage.onCloseRequest = EventHandler { event: WindowEvent? -> closeFileSystem() }
         fileSystem = parameters["fileSystem"] as FileSystem?
         directoryTreeView.selectionModel.selectionMode = SelectionMode.SINGLE
-        directoryTreeView.setCellFactory { view: TreeView<RemoteFile> ->
-            FileTreeCell(
-                { item: TreeItem<RemoteFile> -> item.value.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) },
-                selectedStateBuffer)
+        directoryTreeView.setCellFactory {
+            FileTreeCell({ it.value.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) }, selectedStateBuffer)
         }
-        directoryTreeView.selectionModel.selectedItemProperty().addListener { observable: ObservableValue<out TreeItem<RemoteFile>?>?, unselectedItem: TreeItem<RemoteFile>?, selectedItem: TreeItem<RemoteFile>? ->
+        directoryTreeView.selectionModel.selectedItemProperty().addListener listener@ { observable: ObservableValue<out TreeItem<RemoteFile>?>?, unselectedItem: TreeItem<RemoteFile>?, selectedItem: TreeItem<RemoteFile>? ->
             if (fileSystem == null || selectedItem == null) {
-                return@addListener
+                return@listener
             }
             val selectedFile = selectedItem.value
             pathField.text = selectedFile.path.toString()
             selectedItem.children.clear()
             fileListView.items.clear()
-            launchWithWaitCursor(pathField.generalize(), directoryTreeView.generalize(), fileListView.generalize()) {
+            stage.blockingAction(pathField, directoryTreeView, fileListView) {
                 val directoryItems: MutableList<TreeItem<RemoteFile?>?> = ArrayList()
                 val files: MutableList<RemoteFile?> = ArrayList()
                 if (loadTree(selectedFile, directoryItems, files)) {
@@ -102,7 +101,7 @@ import javax.inject.Named
                 pathField.text = path
                 val treeItem = findTreeItemByPath(directoryTreeView.root, path)
                 treeItem?.children?.clear()
-                launchWithWaitCursor(pathField.generalize(), directoryTreeView.generalize(), fileListView.generalize()) {
+                stage.blockingAction(pathField, directoryTreeView, fileListView) {
                     val directoryItems: MutableList<TreeItem<RemoteFile?>?> = ArrayList()
                     val files: MutableList<RemoteFile?> = ArrayList()
                     if (loadTree(selectedFile, directoryItems, files)) {
@@ -123,22 +122,16 @@ import javax.inject.Named
                 }
             }
         }
-        directoryTreeView.setRoot(directoryTreeRoot)
-        fileSystem!!.rootDirectories
-            .sorted()
-            .map { RemoteFile(it) }
-            .map { TreeItem(it) }
-            .forEach { directoryTreeRoot.children.add(it) }
+        directoryTreeView.root = directoryTreeRoot
+        fileSystem?.rootDirectories
+            ?.sorted()
+            ?.map { RemoteFile(it) }
+            ?.map { TreeItem(it) }
+            ?.forEach { directoryTreeRoot.children.add(it) }
     }
 
     @PreDestroy fun closeFileSystem() {
-        if (fileSystem != null) {
-            try {
-                fileSystem!!.close()
-            } catch (thrown: IOException) {
-                FormController.logger.log(Level.SEVERE, ExceptionUtils.getRootCauseMessage(thrown), thrown)
-            }
-        }
+        fileSystem?.close()
     }
 
     private fun findTreeItemByPath(item: TreeItem<RemoteFile>, path: String): TreeItem<RemoteFile>? {

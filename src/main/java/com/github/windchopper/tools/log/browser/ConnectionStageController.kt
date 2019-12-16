@@ -8,10 +8,6 @@ import com.github.windchopper.common.fx.cdi.form.StageFormLoad
 import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory
 import com.github.windchopper.common.fx.spinner.NumberType
 import com.github.windchopper.common.util.ClassPathResource
-import com.github.windchopper.tools.log.browser.configuration.Connection
-import com.github.windchopper.tools.log.browser.configuration.ConnectionType
-import com.github.windchopper.tools.log.browser.events.ConfigurationSave
-import com.github.windchopper.tools.log.browser.events.PathListConfirm
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Parent
@@ -21,16 +17,16 @@ import javafx.stage.Stage
 import java.io.IOException
 import java.nio.file.FileSystem
 import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.context.Dependent
 import javax.enterprise.event.Event
 import javax.enterprise.event.Observes
 import javax.inject.Inject
 import javax.inject.Named
 
-@ApplicationScoped @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") @Suppress("UNUSED_PARAMETER") class ConnectionStageController: BaseStageController() {
+@Dependent @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") @Suppress("UNUSED_PARAMETER") class ConnectionStageController: BaseStageController() {
 
     @Inject private lateinit var fxmlResourceOpenEvent: Event<FormLoad>
     @Inject private lateinit var saveConfigurationEvent: Event<ConfigurationSave>
-    @Inject private lateinit var asyncRunner: AsyncRunner
 
     @FXML private lateinit var nameField: TextField
     @FXML private lateinit var typeBox: ComboBox<ConnectionType?>
@@ -41,7 +37,7 @@ import javax.inject.Named
     @FXML private lateinit var pathListView: ListView<String>
     @FXML private lateinit var choosePathListButton: Button
 
-    private lateinit var connection: Connection
+    private var connection: Connection? = null
 
     override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
         super.afterLoad(form, parameters, formNamespace)
@@ -54,10 +50,10 @@ import javax.inject.Named
             nameField.text = it.name
             typeBox.value = it.type
             hostField.text = it.host
-            portSpinner.valueFactory.value = it.port
+            portSpinner.valueFactory.value = it.port?:0
             usernameField.text = it.username
             passwordField.text = it.password
-            pathListView.items = connection.pathList.toObservableList()
+            pathListView.items = connection?.pathList?.toObservableList()
         }
     }
 
@@ -80,14 +76,16 @@ import javax.inject.Named
     }
 
     @FXML fun savePressed(event: ActionEvent) {
-        with (connection) {
-            name = nameField.text
-            type = typeBox.value
-            host = hostField.text
-            port = portSpinner.value!!.toInt()
-            username = usernameField.text
-            password = passwordField.text
-            pathList = pathListView.items.toMutableList()
+        connection?.let {
+            with (it) {
+                name = nameField.text
+                type = typeBox.value
+                host = hostField.text
+                port = portSpinner.value!!.toInt()
+                username = usernameField.text
+                password = passwordField.text
+                pathList = pathListView.items.toMutableList()
+            }
         }
 
         saveConfigurationEvent.fire(ConfigurationSave())
@@ -95,7 +93,7 @@ import javax.inject.Named
     }
 
     @FXML fun choosePathListButton(event: ActionEvent) {
-        launchWithWaitCursor(choosePathListButton.generalize()) {
+        stage.blockingAction(choosePathListButton) {
             fxmlResourceOpenEvent.fire(
                 StageFormLoad(ClassPathResource(Globals.FXML__BROWSE), mapOf("fileSystem" to newFileSystem())) {
                     Stage().also {

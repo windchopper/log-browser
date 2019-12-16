@@ -13,6 +13,7 @@ import java.util.function.Consumer
 @Suppress("UNUSED_PARAMETER") class FileListCell(
     private val selectedStateCallback: Callback<RemoteFile, BooleanProperty>,
     private val selectedStateBuffer: Map<String, BooleanProperty>): ListCell<RemoteFile>() {
+
     private val checkBox: CheckBox
     private var booleanProperty: BooleanProperty? = null
 

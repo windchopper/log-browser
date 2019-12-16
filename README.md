@@ -1,0 +1,1 @@
+--add-opens java.base/java.lang=weld.core.impl

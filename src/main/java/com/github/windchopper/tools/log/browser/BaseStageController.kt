@@ -1,21 +1,31 @@
 package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.common.fx.cdi.form.FormController
 import com.github.windchopper.common.fx.cdi.form.StageFormController
 import com.github.windchopper.common.fx.dialog.OptionDialog
 import com.github.windchopper.common.fx.dialog.OptionDialogModel
+import javafx.event.EventTarget
 import javafx.scene.Cursor
+import javafx.scene.Node
 import javafx.scene.Parent
+import javafx.scene.Scene
+import javafx.scene.control.MenuItem
 import javafx.stage.Modality
 import javafx.stage.Stage
+import javafx.stage.Window
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.logging.Level
+import java.util.logging.Logger
 
-abstract class BaseStageController: StageFormController() {
+@WeldAware abstract class BaseStageController: StageFormController() {
+
+    companion object {
+        val logger = Logger.getLogger(BaseStageController::class.qualifiedName)
+    }
 
     override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
         super.afterLoad(form, parameters, formNamespace)
@@ -37,9 +47,9 @@ abstract class BaseStageController: StageFormController() {
         alert(OptionDialog.Type.ERROR, message)
     }
 
-    fun errorLogAndAlert(exception: Exception?) {
+    fun errorLogAndAlert(exception: Throwable) {
         val errorMessage = ExceptionUtils.getRootCauseMessage(exception)
-        FormController.logger.log(Level.SEVERE, errorMessage, exception)
+        logger.log(Level.SEVERE, errorMessage, exception)
         errorAlert(errorMessage)
     }
 
@@ -53,20 +63,37 @@ abstract class BaseStageController: StageFormController() {
             ?:currentStage
     }
 
-    fun launchWithWaitCursor(vararg disableNodes: NodeOrMenuItem, action: () -> Unit) {
-        stage.scene.cursor = Cursor.WAIT
-        disableNodes.forEach { it.disabled = true }
+    fun EventTarget.blockingAction(vararg disableEventTargets: EventTarget, blockingAction: () -> Unit): Job {
+        val cursorProperty = when (this) {
+            is Node -> this.cursorProperty(); is Scene -> this.cursorProperty(); is Window -> this.scene.cursorProperty(); else -> null
+        }
 
-        GlobalScope.launch {
-            try {
-                action()
-            } catch (thrown: Exception) {
-                errorLogAndAlert(thrown)
-            } finally {
-                disableNodes.forEach { it.disabled = false }
-                stage.scene.cursor = Cursor.DEFAULT
+        val disableProperties = disableEventTargets.mapNotNull {
+            when (it) {
+                is Node -> it.disableProperty(); is MenuItem -> it.disableProperty(); else -> null
             }
         }
+
+        cursorProperty?.set(Cursor.WAIT)
+        disableProperties.forEach { it.set(true) }
+
+        val job = GlobalScope.launch {
+            try {
+                blockingAction()
+            } finally {
+                disableProperties.forEach { it.set(false) }
+                cursorProperty?.set(Cursor.DEFAULT)
+            }
+        }
+
+        job.invokeOnCompletion {
+            it?.let {
+                errorLogAndAlert(it)
+            }
+        }
+
+        return job
     }
 
 }
+

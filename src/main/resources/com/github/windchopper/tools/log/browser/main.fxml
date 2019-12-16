@@ -33,7 +33,7 @@
                         <items>
                             <MenuItem fx:id="downloadMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.download" onAction="#downloadSelected"/>
                             <SeparatorMenuItem/>
-                            <Menu text="%com.github.windchopper.tools.log.browser.main.tree.menu.add">
+                            <Menu fx:id="addMenu" text="%com.github.windchopper.tools.log.browser.main.tree.menu.add">
                                 <MenuItem fx:id="addGroupMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addGroup" onAction="#addGroupSelected"/>
                                 <SeparatorMenuItem/>
                                 <MenuItem fx:id="addConnectionMenuItem" text="%com.github.windchopper.tools.log.browser.main.tree.menu.addConnection" onAction="#addConnectionSelected"/>

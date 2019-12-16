@@ -11,6 +11,14 @@ import org.jboss.weld.environment.se.WeldContainer
 
 class Launcher: Application() {
 
+    companion object {
+
+        fun main(vararg args: String) {
+            launch(Launcher::class.java, *args)
+        }
+
+    }
+
     private var weld: Weld = Weld()
         .enableDiscovery()
         .addPackages(FormLoader::class.java)
@@ -28,8 +36,4 @@ class Launcher: Application() {
         }
     }
 
-}
-
-fun main(vararg args: String) {
-    Application.launch(*args)
 }

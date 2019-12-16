@@ -27,8 +27,7 @@ import javax.xml.bind.PropertyException
 
     var configuration: Configuration? = null
 
-    @PostConstruct
-    private fun afterConstruction() {
+    @PostConstruct private fun afterConstruction() {
         try {
             configurationFile = Paths.get(Optional.ofNullable(System.getProperty("user.home"))
                 .orElse(""))
@@ -57,8 +56,7 @@ import javax.xml.bind.PropertyException
         }
     }
 
-    @Throws(IOException::class, JAXBException::class)
-    fun saveConfiguration() {
+    @Throws(IOException::class, JAXBException::class) fun saveConfiguration() {
         val tempFile = Files.createTempFile("save-conf-temp-", ".xml")
         Files.newBufferedWriter(tempFile).use { writer -> marshaller!!.marshal(configuration, writer) }
         Files.move(

@@ -16,9 +16,9 @@ import javafx.scene.control.*
 import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.function.Consumer
 import java.util.function.Predicate
@@ -28,7 +28,7 @@ import javax.enterprise.event.Observes
 import javax.inject.Inject
 import javax.inject.Named
 
-@ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") @Suppress("UNUSED_PARAMETER") class MainStageController: BaseStageController() {
+@ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") @Suppress("UNUSED_PARAMETER", "UNUSED_ANONYMOUS_PARAMETER") class MainStageController: BaseStageController() {
 
     @Inject private lateinit var formLoadEvent: Event<FormLoad>
     @Inject private lateinit var configurationSaveEvent: Event<ConfigurationSave>
@@ -40,6 +40,7 @@ import javax.inject.Named
     @FXML private lateinit var importConfigurationMenuItem: MenuItem
     @FXML private lateinit var exportConfigurationMenuItem: MenuItem
     @FXML private lateinit var downloadMenuItem: MenuItem
+    @FXML private lateinit var addMenu: Menu
     @FXML private lateinit var addGroupMenuItem: MenuItem
     @FXML private lateinit var addConnectionMenuItem: MenuItem
     @FXML private lateinit var removeMenuItem: MenuItem
@@ -92,7 +93,7 @@ import javax.inject.Named
             .map { obj: TreeItem<ConfigurationElement> -> obj.value }
             .filter(Predicate.not { item: ConfigurationElement? -> item is Connection })
             .count()
-        addConnectionMenuItem.isDisable = 1 != selectedItems.size
+        addConnectionMenuItem.isDisable = 1 != selectedItems.filter { it.value !is Connection }.size
         removeMenuItem.isDisable = selectedItems.isEmpty() || selectedItems.stream()
             .map { obj: TreeItem<ConfigurationElement> -> obj.value }
             .anyMatch { item: ConfigurationElement? -> item is Configuration }
@@ -100,10 +101,12 @@ import javax.inject.Named
             .map { obj: TreeItem<ConfigurationElement> -> obj.value }
             .filter(Predicate.not { item: ConfigurationElement? -> item is Configuration })
             .count()
+
+        addMenu.isDisable = addGroupMenuItem.isDisable && addConnectionMenuItem.isDisable
     }
 
     private fun openWindow(fxmlResource: Resource, parameterName: String, parameter: Any) {
-        launchWithWaitCursor(propertiesMenuItem.generalize()) {
+        stage.blockingAction(propertiesMenuItem) {
             formLoadEvent.fire(
                 StageFormLoad(fxmlResource, mapOf(parameterName to parameter)) {
                     Stage().also {
@@ -123,13 +126,15 @@ import javax.inject.Named
     }
 
     @FXML fun downloadSelected(event: ActionEvent?) {
-        formLoadEvent.fire(TabFormLoad(
-            ClassPathResource(Globals.FXML__DOWNLOAD),
-            java.util.Map.of("selection", java.util.List.copyOf(configurationTreeView.selectionModel.selectedItems)),
-            Pipeliner.of { Tab() }
-                .set({ tab: Tab -> Consumer { value: String? -> tab.text = value } }, String.format("%1\$tF %1\$tT", LocalDateTime.now()))
-                .accept { tab: Tab? -> workareaPane.tabs.add(tab) }
-                .accept { tab: Tab? -> workareaPane.selectionModel.select(tab) }))
+        formLoadEvent.fire(TabFormLoad(ClassPathResource(Globals.FXML__DOWNLOAD), mapOf("selection" to configurationTreeView.selectionModel.selectedItems.toList())) {
+            Tab().also {
+                it.text = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+                with (workareaPane) {
+                    tabs.add(it)
+                    selectionModel.select(it)
+                }
+            }
+        })
     }
 
     @FXML fun addGroupSelected(event: ActionEvent?) {

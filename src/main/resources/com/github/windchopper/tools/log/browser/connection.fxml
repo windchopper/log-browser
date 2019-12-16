@@ -23,7 +23,7 @@
     <ComboBox fx:id="typeBox" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="0" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets" onAction="#typeSelected"/>
     <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
     <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
-    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.host"/>
+    <Label GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.port"/>
     <Spinner fx:id="portSpinner" GridPane.columnIndex="3" GridPane.rowIndex="1" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
     <Label GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.margin="$insets" text="%com.github.windchopper.tools.log.browser.connection.user"/>
     <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.fillWidth="true" GridPane.hgrow="ALWAYS" GridPane.margin="$insets"/>
