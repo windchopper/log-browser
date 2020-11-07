@@ -1,10 +1,16 @@
+@file:Suppress("UNUSED_ANONYMOUS_PARAMETER")
+
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.fx.cdi.form.Form
-import com.github.windchopper.common.fx.cdi.form.FormController
 import com.github.windchopper.tools.log.browser.fx.FileListCell
 import com.github.windchopper.tools.log.browser.fx.FileTreeCell
 import com.github.windchopper.tools.log.browser.fx.RemoteFile
+import jakarta.annotation.PreDestroy
+import jakarta.enterprise.context.Dependent
+import jakarta.enterprise.event.Event
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.value.ObservableValue
@@ -14,21 +20,11 @@ import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
-import javafx.stage.WindowEvent
-import javafx.util.Callback
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.IOException
 import java.nio.file.FileSystem
 import java.nio.file.Files
 import java.util.*
-import java.util.logging.Level
-import javax.annotation.PreDestroy
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.context.Dependent
-import javax.enterprise.event.Event
-import javax.inject.Inject
-import javax.inject.Named
 
 @Dependent @Form(Globals.FXML__BROWSE) @Named("BrowseStageController") @Suppress("UNUSED_PARAMETER") class BrowseStageController: BaseStageController() {
 
@@ -60,7 +56,7 @@ import javax.inject.Named
 
     override fun afterLoad(form: Parent, parameters: Map<String?, *>, formNamespace: Map<String?, *>) {
         super.afterLoad(form, parameters, formNamespace)
-        stage.onCloseRequest = EventHandler { event: WindowEvent? -> closeFileSystem() }
+        stage.onCloseRequest = EventHandler { closeFileSystem() }
         fileSystem = parameters["fileSystem"] as FileSystem?
         directoryTreeView.selectionModel.selectionMode = SelectionMode.SINGLE
         directoryTreeView.setCellFactory {
@@ -89,7 +85,7 @@ import javax.inject.Named
         fileListView.selectionModel.selectionMode = SelectionMode.SINGLE
         fileListView.setCellFactory { view: ListView<RemoteFile>? ->
             FileListCell(
-                Callback { file: RemoteFile -> file.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) },
+                { file: RemoteFile -> file.createSelectedProperty(selectedStateBuffer, directoryTreeView, fileListView) },
                 selectedStateBuffer)
         }
         fileListView.onMouseClicked = EventHandler { event: MouseEvent ->

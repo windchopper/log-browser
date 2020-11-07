@@ -5,9 +5,13 @@ import com.github.windchopper.common.fx.cdi.form.Form
 import com.github.windchopper.common.fx.cdi.form.FormLoad
 import com.github.windchopper.common.fx.cdi.form.StageFormLoad
 import com.github.windchopper.common.util.ClassPathResource
-import com.github.windchopper.common.util.Pipeliner
 import com.github.windchopper.common.util.Resource
 import com.github.windchopper.tools.log.browser.Globals.bundle
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.enterprise.event.Event
+import jakarta.enterprise.event.Observes
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXML
@@ -16,17 +20,12 @@ import javafx.scene.control.*
 import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.function.Consumer
 import java.util.function.Predicate
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.event.Event
-import javax.enterprise.event.Observes
-import javax.inject.Inject
-import javax.inject.Named
 
 @ApplicationScoped @Form(Globals.FXML__MAIN) @Named("MainStageController") @Suppress("UNUSED_PARAMETER", "UNUSED_ANONYMOUS_PARAMETER") class MainStageController: BaseStageController() {
 

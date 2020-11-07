@@ -1,6 +1,8 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.fx.cdi.form.Form
+import jakarta.enterprise.context.Dependent
+import jakarta.inject.Named
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Parent
@@ -14,9 +16,6 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.*
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.context.Dependent
-import javax.inject.Named
 
 @Dependent @Form(Globals.FXML__DOWNLOAD) @Named("GatheringStageController") @Suppress("UNUSED_PARAMETER") class DownloadTabController: BaseController() {
 

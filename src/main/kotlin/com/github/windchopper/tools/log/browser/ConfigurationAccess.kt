@@ -1,6 +1,13 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.util.Pipeliner
+import jakarta.annotation.PostConstruct
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Named
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBException
+import jakarta.xml.bind.Marshaller
+import jakarta.xml.bind.PropertyException
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.IOException
@@ -11,13 +18,6 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
-import javax.annotation.PostConstruct
-import javax.enterprise.context.ApplicationScoped
-import javax.inject.Named
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
-import javax.xml.bind.Marshaller
-import javax.xml.bind.PropertyException
 
 @ApplicationScoped @Named("ConfigurationAccess") class ConfigurationAccess {
 

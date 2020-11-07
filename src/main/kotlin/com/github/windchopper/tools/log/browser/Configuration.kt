@@ -1,12 +1,13 @@
 package com.github.windchopper.tools.log.browser
 
-import com.github.windchopper.fs.sftp.SftpConstants
+import com.github.windchopper.fs.sftp.SftpConfiguration
+import com.github.windchopper.fs.sftp.SftpFileSystem
+import jakarta.xml.bind.annotation.*
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
-import javax.xml.bind.annotation.*
 
 @XmlRootElement(name = "configuration") @XmlAccessorType(XmlAccessType.FIELD) class Configuration: Group()
 
@@ -55,8 +56,8 @@ enum class ConnectionType(val defaultPort: Int, val defaultPath: String, val tit
 
         @Throws(IOException::class) override fun newFileSystem(host: String, port: Int, username: String?, password: String?): FileSystem {
             return try {
-                FileSystems.newFileSystem(URI(SftpConstants.SCHEME, null, host, port, null, null, null),
-                    mapOf(SftpConstants.USERNAME to username, SftpConstants.PASSWORD to password))
+                FileSystems.newFileSystem(URI(SftpFileSystem.SCHEME, null, host, port, null, null, null),
+                    mapOf(SftpConfiguration.PropertyNames.USERNAME to username, SftpConfiguration.PropertyNames.PASSWORD to password))
             } catch (thrown: URISyntaxException) {
                 throw IOException(thrown.message, thrown)
             }

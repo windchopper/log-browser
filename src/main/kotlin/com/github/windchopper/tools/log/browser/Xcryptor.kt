@@ -1,17 +1,17 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.preferences.PreferencesEntry
+import jakarta.annotation.PostConstruct
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Named
 import java.security.GeneralSecurityException
 import java.security.SecureRandom
 import java.util.*
-import javax.annotation.PostConstruct
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.PBEParameterSpec
-import javax.enterprise.context.ApplicationScoped
-import javax.inject.Named
 
 @ApplicationScoped @Named("Xcryptor") class Xcryptor {
 

@@ -8,6 +8,11 @@ import com.github.windchopper.common.fx.cdi.form.StageFormLoad
 import com.github.windchopper.common.fx.spinner.FlexibleSpinnerValueFactory
 import com.github.windchopper.common.fx.spinner.NumberType
 import com.github.windchopper.common.util.ClassPathResource
+import jakarta.enterprise.context.Dependent
+import jakarta.enterprise.event.Event
+import jakarta.enterprise.event.Observes
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Parent
@@ -16,14 +21,9 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import java.io.IOException
 import java.nio.file.FileSystem
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.context.Dependent
-import javax.enterprise.event.Event
-import javax.enterprise.event.Observes
-import javax.inject.Inject
-import javax.inject.Named
 
-@Dependent @Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") @Suppress("UNUSED_PARAMETER") class ConnectionStageController: BaseStageController() {
+@Dependent
+@Form(Globals.FXML__CONNECTION) @Named("ConnectionStageController") @Suppress("UNUSED_PARAMETER") class ConnectionStageController: BaseStageController() {
 
     @Inject private lateinit var fxmlResourceOpenEvent: Event<FormLoad>
     @Inject private lateinit var saveConfigurationEvent: Event<ConfigurationSave>

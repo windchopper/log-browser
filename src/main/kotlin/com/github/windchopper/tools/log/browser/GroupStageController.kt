@@ -1,13 +1,12 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.fx.cdi.form.Form
+import jakarta.enterprise.context.Dependent
+import jakarta.inject.Named
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.Parent
 import javafx.scene.control.TextField
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.context.Dependent
-import javax.inject.Named
 
 @Dependent @Form(Globals.FXML__GROUP) @Named("GroupStageController") @Suppress("UNUSED_PARAMETER") class GroupStageController: BaseStageController() {
 

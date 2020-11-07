@@ -1,15 +1,15 @@
 package com.github.windchopper.tools.log.browser
 
 import com.github.windchopper.common.fx.cdi.form.StageFormController
-import com.github.windchopper.common.fx.dialog.OptionDialog
-import com.github.windchopper.common.fx.dialog.OptionDialogModel
 import javafx.event.EventTarget
 import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType
+import javafx.scene.control.ButtonType
 import javafx.scene.control.MenuItem
-import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.Window
 import kotlinx.coroutines.Dispatchers
@@ -32,19 +32,18 @@ import java.util.logging.Logger
         stage.icons.add(Globals.logoImage)
     }
 
-    private fun alert(alertType: OptionDialog.Type, message: String) {
+    private fun alert(alertType: AlertType, message: String) {
         GlobalScope.launch(Dispatchers.JavaFx) {
-            OptionDialog.showOptionDialog(message, alertType, listOf(OptionDialogModel.Option.OK),
-                prepareStageDialogFrame(Globals.logoImage, Modality.WINDOW_MODAL, false))
+            Alert(alertType, message, ButtonType.OK).show()
         }
     }
 
     fun informationAlert(message: String) {
-        alert(OptionDialog.Type.INFORMATION, message)
+        alert(AlertType.INFORMATION, message)
     }
 
     fun errorAlert(message: String) {
-        alert(OptionDialog.Type.ERROR, message)
+        alert(AlertType.ERROR, message)
     }
 
     fun errorLogAndAlert(exception: Throwable) {
